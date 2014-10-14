@@ -6,6 +6,7 @@
 #include <TBToolkit/Shader.h>
 #include <TBToolkit/Common.h>
 #include <memory>
+#include <MathGeoLib.h>
 
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
@@ -18,6 +19,7 @@ struct ID3D11DeviceContext;
 struct ID3D11RenderTargetView;
 struct ID3D11Texture2D;
 struct ID3D11DepthStencilView;
+struct ID3DUserDefinedAnnotation;
 
 namespace TB
 {
@@ -31,7 +33,8 @@ namespace TB
 
     struct DirectXViewConstants
     {
-        DirectX::XMMATRIX worldToProjected;
+        DirectX::XMMATRIX worldToView;
+        DirectX::XMMATRIX viewToClip;
     };
 
     struct DirectXWorldConstants
@@ -61,11 +64,24 @@ namespace TB
         virtual std::shared_ptr<Shader> loadShader(const std::string& path, const std::string& entryPoint, ShaderType type) override;
         virtual std::shared_ptr<Texture> loadTexture(const std::string& path) override;
 
+        void clear(ID3D11RenderTargetView* rtv, const math::float4& color);
+        void clear(ID3D11DepthStencilView* dsv, float depth = 1.0f, int stencil = 0);
+
+        DirectX::XMMATRIX getProjMatrix(float fovAngleY, int viewportW, int viewportH, float nearZ, int offsetX = 0, int offsetY = 0) const;
+        int32_t getWidth() const { return mWidth; }
+        int32_t getHeight() const { return mHeight; }
         const ComPtr<ID3D11Device>& getDevice() const { return mDevice; }
         const ComPtr<ID3D11DeviceContext>& getImmediateContext() const { return mImmediateContext; }
 
+        const ComPtr<ID3D11RenderTargetView>& getBackBufferRTV() const { return mBackBufferRTV; }
+        const ComPtr<ID3D11DepthStencilView>& getBackBufferDSV() const { return mBackBufferDSV; }
+
+        void beginEvent(const wchar_t* name) const;
+        void endEvent() const;
+
     private:
         std::shared_ptr<class WindowsCanvas> mCanvas;
+        int32_t mWidth, mHeight;
 
         ComPtr<ID3D11Device> mDevice;
         ComPtr<IDXGISwapChain> mSwapChain;
@@ -74,6 +90,8 @@ namespace TB
         ComPtr<ID3D11RenderTargetView> mBackBufferRTV;
         ComPtr<ID3D11Texture2D> mDepthStencil;
         ComPtr<ID3D11DepthStencilView> mBackBufferDSV;
+
+        ComPtr<ID3DUserDefinedAnnotation> mUserDefinedAnnotation;
 
         std::shared_ptr<struct IDirectXFrame> mFrame;
     };

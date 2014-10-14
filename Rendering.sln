@@ -13,6 +13,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{71EFBC3D
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MathGeoLib", "TBToolkit\External\MathGeoLib\vs2013\MathGeoLib.vcxproj", "{3EED859A-ECCF-4C1D-BB4C-FCAF6BD1DD7A}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AntiAlias", "AntiAliasing\AntiAlias.vcxproj", "{ACCC5416-56D4-4682-8C92-835223CC0D4C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -35,6 +37,10 @@ Global
 		{3EED859A-ECCF-4C1D-BB4C-FCAF6BD1DD7A}.Debug|x64.Build.0 = Debug|x64
 		{3EED859A-ECCF-4C1D-BB4C-FCAF6BD1DD7A}.Release|x64.ActiveCfg = Release|x64
 		{3EED859A-ECCF-4C1D-BB4C-FCAF6BD1DD7A}.Release|x64.Build.0 = Release|x64
+		{ACCC5416-56D4-4682-8C92-835223CC0D4C}.Debug|x64.ActiveCfg = Debug|x64
+		{ACCC5416-56D4-4682-8C92-835223CC0D4C}.Debug|x64.Build.0 = Debug|x64
+		{ACCC5416-56D4-4682-8C92-835223CC0D4C}.Release|x64.ActiveCfg = Release|x64
+		{ACCC5416-56D4-4682-8C92-835223CC0D4C}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

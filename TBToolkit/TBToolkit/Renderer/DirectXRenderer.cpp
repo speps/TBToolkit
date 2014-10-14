@@ -7,13 +7,15 @@
 #include <TBToolkit/Renderer/DirectXShader.h>
 #include <TBToolkit/Renderer/DirectXTexture.h>
 #include <OpenGEX.h>
-#include <d3d11.h>
+#include <d3d11_1.h>
 
 namespace TB
 {
     DirectXRenderer::DirectXRenderer(const std::shared_ptr<Canvas>& canvas, const std::shared_ptr<IDirectXFrame>& frame)
         : Renderer(canvas)
         , mCanvas(std::dynamic_pointer_cast<WindowsCanvas>(canvas))
+        , mWidth(0)
+        , mHeight(0)
         , mDevice()
         , mSwapChain()
         , mImmediateContext()
@@ -36,8 +38,8 @@ namespace TB
 
         RECT rc;
         GetClientRect(hwnd, &rc);
-        UINT width = rc.right - rc.left;
-        UINT height = rc.bottom - rc.top;
+        mWidth = rc.right - rc.left;
+        mHeight = rc.bottom - rc.top;
 
         UINT createDeviceFlags = 0;
     #ifdef _DEBUG
@@ -54,6 +56,7 @@ namespace TB
 
         D3D_FEATURE_LEVEL featureLevels[] =
         {
+            D3D_FEATURE_LEVEL_11_1,
             D3D_FEATURE_LEVEL_11_0,
             D3D_FEATURE_LEVEL_10_1,
             D3D_FEATURE_LEVEL_10_0,
@@ -63,14 +66,14 @@ namespace TB
         DXGI_SWAP_CHAIN_DESC sd;
         ZeroMemory(&sd, sizeof(sd));
         sd.BufferCount = 1;
-        sd.BufferDesc.Width = width;
-        sd.BufferDesc.Height = height;
+        sd.BufferDesc.Width = mWidth;
+        sd.BufferDesc.Height = mHeight;
         sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
         sd.BufferDesc.RefreshRate.Numerator = 60;
         sd.BufferDesc.RefreshRate.Denominator = 1;
         sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
         sd.OutputWindow = hwnd;
-        sd.SampleDesc.Count = 8;
+        sd.SampleDesc.Count = 1;
         sd.SampleDesc.Quality = 0;
         sd.Windowed = TRUE;
 
@@ -92,6 +95,8 @@ namespace TB
             return false;
         }
 
+        mImmediateContext->QueryInterface(IID_ID3DUserDefinedAnnotation, (void**)mUserDefinedAnnotation.getInitRef());
+
         // Create a render target view
         ID3D11Texture2D* pBackBuffer = nullptr;
         hr = mSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
@@ -110,12 +115,12 @@ namespace TB
         // Create depth stencil texture
         D3D11_TEXTURE2D_DESC descDepth;
         ZeroMemory( &descDepth, sizeof(descDepth) );
-        descDepth.Width = width;
-        descDepth.Height = height;
+        descDepth.Width = mWidth;
+        descDepth.Height = mHeight;
         descDepth.MipLevels = 1;
         descDepth.ArraySize = 1;
         descDepth.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-        descDepth.SampleDesc.Count = 8;
+        descDepth.SampleDesc.Count = 1;
         descDepth.SampleDesc.Quality = 0;
         descDepth.Usage = D3D11_USAGE_DEFAULT;
         descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL;
@@ -143,8 +148,8 @@ namespace TB
 
         // Setup the viewport
         D3D11_VIEWPORT vp;
-        vp.Width = (FLOAT)width;
-        vp.Height = (FLOAT)height;
+        vp.Width = (FLOAT)mWidth;
+        vp.Height = (FLOAT)mHeight;
         vp.MinDepth = 0.0f;
         vp.MaxDepth = 1.0f;
         vp.TopLeftX = 0;
@@ -166,9 +171,6 @@ namespace TB
 
     void DirectXRenderer::render()
     {
-        const FLOAT clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-        mImmediateContext->ClearRenderTargetView(mBackBufferRTV, clearColor);
-        mImmediateContext->ClearDepthStencilView(mBackBufferDSV, D3D11_CLEAR_DEPTH, 1.0f, 0);
         if (mFrame != nullptr)
         {
             mFrame->render();
@@ -182,6 +184,50 @@ namespace TB
         {
             mFrame->update(delta);
         }
+    }
+
+    void DirectXRenderer::clear(ID3D11RenderTargetView* rtv, const math::float4& color)
+    {
+        const FLOAT clearColor[] = { color.x, color.y, color.z, color.w };
+        mImmediateContext->ClearRenderTargetView(rtv, clearColor);
+    }
+
+    void DirectXRenderer::clear(ID3D11DepthStencilView* dsv, float depth, int stencil)
+    {
+        mImmediateContext->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH, depth, (UINT8)stencil);
+    }
+
+    DirectX::XMMATRIX DirectXRenderer::getProjMatrix(float fovAngleY, int viewportW, int viewportH, float nearZ, int offsetX, int offsetY) const
+    {
+        float sinFov;
+        float cosFov;
+        DirectX::XMScalarSinCos(&sinFov, &cosFov, 0.5f * fovAngleY);
+
+        float height = cosFov / sinFov;
+        float width = height / (((float)viewportW) / viewportH);
+
+        DirectX::XMFLOAT4X4 M;
+        M.m[0][0] = width;
+        M.m[0][1] = 0.0f;
+        M.m[0][2] = 0.0f;
+        M.m[0][3] = 0.0f;
+
+        M.m[1][0] = 0.0f;
+        M.m[1][1] = height;
+        M.m[1][2] = 0.0f;
+        M.m[1][3] = 0.0f;
+
+        M.m[2][0] = offsetX / (float)viewportW;
+        M.m[2][1] = offsetY / (float)viewportH;
+        M.m[2][2] = -1.0f;
+        M.m[2][3] = -1.0f;
+
+        M.m[3][0] = 0.0f;
+        M.m[3][1] = 0.0f;
+        M.m[3][2] = -nearZ;
+        M.m[3][3] = 0.0f;
+
+        return DirectX::XMLoadFloat4x4(&M);
     }
 
     std::shared_ptr<Scene> DirectXRenderer::loadScene(const std::string& path)
@@ -204,6 +250,22 @@ namespace TB
     std::shared_ptr<Texture> DirectXRenderer::loadTexture(const std::string& path)
     {
         return std::make_shared<DirectXTexture>(shared_from_this(), path);
+    }
+
+    void DirectXRenderer::beginEvent(const wchar_t* name) const
+    {
+        if (mUserDefinedAnnotation.isValid())
+        {
+            mUserDefinedAnnotation->BeginEvent(name);
+        }
+    }
+
+    void DirectXRenderer::endEvent() const
+    {
+        if (mUserDefinedAnnotation.isValid())
+        {
+            mUserDefinedAnnotation->EndEvent();
+        }
     }
 
     std::shared_ptr<Renderer> CreateDirectXRenderer(const std::shared_ptr<Canvas>& canvas, const std::shared_ptr<IDirectXFrame>& frame)

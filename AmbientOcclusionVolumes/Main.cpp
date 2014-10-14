@@ -122,6 +122,8 @@ public:
         imc->PSSetShaderResources(0, 1, srvs);
         imc->PSSetSamplers(0, 1, samplers);
 
+        mRenderer->clear(mRenderer->getBackBufferRTV(), math::float4(0.0f, 0.0f, 0.0f, 0.0f));
+        mRenderer->clear(mRenderer->getBackBufferDSV());
         mScene->render();
     }
 
@@ -131,8 +133,10 @@ public:
 
         auto up = DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f);
         DirectX::XMMATRIX viewMatrix = DirectX::XMMatrixLookAtRH(DirectX::XMLoadFloat3(&eyePos), DirectX::XMLoadFloat3(&lookPos), DirectX::XMLoadFloat3(&up));
-        DirectX::XMMATRIX projMatrix = DirectX::XMMatrixPerspectiveFovRH(0.78f * 0.625f, 1280.0f / 720.0f, 1.0f, 10000.0f);
-        viewConstants.worldToProjected = DirectX::XMMatrixTranspose(DirectX::XMMatrixMultiply(viewMatrix, projMatrix));
+        viewConstants.worldToView = DirectX::XMMatrixTranspose(viewMatrix);
+
+        DirectX::XMMATRIX projMatrix = mRenderer->getProjMatrix(0.78f * 0.625f, 1280, 720, 1.0f);
+        viewConstants.viewToClip = DirectX::XMMatrixTranspose(projMatrix);
 
         mViewConstants.update(viewConstants);
     }

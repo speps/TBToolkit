@@ -14,7 +14,7 @@ namespace TB
             : mPtr(nullptr)
         {}
 
-        ComPtr(PtrType* ptr,bool addRef = true)
+        ComPtr(PtrType* ptr, bool addRef = true)
             : mPtr(ptr)
         {
             if (mPtr && addRef)
