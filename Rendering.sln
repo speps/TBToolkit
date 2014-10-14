@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30723.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AmbientOcclusionVolumes", "AmbientOcclusionVolumes\AmbientOcclusionVolumes.vcxproj", "{517CD147-033D-4CAD-B91A-EECA857B2C61}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TBToolkit", "TBToolkit\TBToolkit.vcxproj", "{6E7486F0-FD77-4996-98C8-22EBC42697F8}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TBContentBuild", "TBToolkit\Tools\TBContentBuild\TBContentBuild.vcxproj", "{92CC174A-9359-48D3-AAC5-96D1FAABC03D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{71EFBC3D-609D-47AB-9D37-52B4BEF5EBB0}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MathGeoLib", "TBToolkit\External\MathGeoLib\vs2013\MathGeoLib.vcxproj", "{3EED859A-ECCF-4C1D-BB4C-FCAF6BD1DD7A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{517CD147-033D-4CAD-B91A-EECA857B2C61}.Debug|x64.ActiveCfg = Debug|x64
+		{517CD147-033D-4CAD-B91A-EECA857B2C61}.Debug|x64.Build.0 = Debug|x64
+		{517CD147-033D-4CAD-B91A-EECA857B2C61}.Release|x64.ActiveCfg = Release|x64
+		{517CD147-033D-4CAD-B91A-EECA857B2C61}.Release|x64.Build.0 = Release|x64
+		{6E7486F0-FD77-4996-98C8-22EBC42697F8}.Debug|x64.ActiveCfg = Debug|x64
+		{6E7486F0-FD77-4996-98C8-22EBC42697F8}.Debug|x64.Build.0 = Debug|x64
+		{6E7486F0-FD77-4996-98C8-22EBC42697F8}.Release|x64.ActiveCfg = Release|x64
+		{6E7486F0-FD77-4996-98C8-22EBC42697F8}.Release|x64.Build.0 = Release|x64
+		{92CC174A-9359-48D3-AAC5-96D1FAABC03D}.Debug|x64.ActiveCfg = Debug|x64
+		{92CC174A-9359-48D3-AAC5-96D1FAABC03D}.Debug|x64.Build.0 = Debug|x64
+		{92CC174A-9359-48D3-AAC5-96D1FAABC03D}.Release|x64.ActiveCfg = Release|x64
+		{92CC174A-9359-48D3-AAC5-96D1FAABC03D}.Release|x64.Build.0 = Release|x64
+		{3EED859A-ECCF-4C1D-BB4C-FCAF6BD1DD7A}.Debug|x64.ActiveCfg = Debug|x64
+		{3EED859A-ECCF-4C1D-BB4C-FCAF6BD1DD7A}.Debug|x64.Build.0 = Debug|x64
+		{3EED859A-ECCF-4C1D-BB4C-FCAF6BD1DD7A}.Release|x64.ActiveCfg = Release|x64
+		{3EED859A-ECCF-4C1D-BB4C-FCAF6BD1DD7A}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{92CC174A-9359-48D3-AAC5-96D1FAABC03D} = {71EFBC3D-609D-47AB-9D37-52B4BEF5EBB0}
+		{3EED859A-ECCF-4C1D-BB4C-FCAF6BD1DD7A} = {71EFBC3D-609D-47AB-9D37-52B4BEF5EBB0}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--Copyright, Microsoft Corporation, All rights reserved.-->
+<ProjectSchemaDefinitions xmlns="http://schemas.microsoft.com/build/2009/properties" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib">
+  <Rule Name="ToolkitContentTask"
+        PageTemplate="tool"
+        DisplayName="TBToolkit Content Pipeline"
+        SwitchPrefix=""
+        Order="300">
+
+    <Rule.Categories>
+      <Category Name="General" DisplayName="General" />
+    </Rule.Categories>
+
+    <Rule.DataSource>
+      <DataSource Persistence="ProjectFile" ItemType="ToolkitContentTask" Label="" HasConfigurationCondition="true" />
+    </Rule.DataSource>
+
+    <StringProperty Subtype="file"
+                    Name="ContentOutput"
+                    DisplayName="Content Output"
+                    Description="The output file for the content."
+                    Category="General"
+                    Switch=""
+                    F1Keyword="VC.Project.ToolkitContentTask.ContentOutput">
+    </StringProperty>
+
+  </Rule>
+
+  <ItemType
+   Name="ToolkitContentTask"
+   DisplayName="TBToolkit Content Pipeline" />
+  <FileExtension
+    Name="*.gex"
+    ContentType="ToolkitContentTask" />
+  <ContentType
+    Name="ToolkitContentTask"
+    DisplayName="TBToolkit Content Pipeline"
+    ItemType="ToolkitContentTask" />
+
+</ProjectSchemaDefinitions>

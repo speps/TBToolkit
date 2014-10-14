@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup Condition="'$(ToolkitContentTaskBeforeTargets)' == '' and '$(ToolkitContentTaskAfterTargets)' == '' and '$(ConfigurationType)' != 'Makefile'">
+    <ToolkitContentTaskBeforeTargets>Midl</ToolkitContentTaskBeforeTargets>
+    <ToolkitContentTaskAfterTargets>CustomBuild</ToolkitContentTaskAfterTargets>
+  </PropertyGroup>
+
+  <ItemDefinitionGroup>
+    <ToolkitContentTask>
+      <!--Enter Defaults Here-->
+      <ContentOutput Condition="'%(ToolkitContentTask.ContentOutput)' == ''">$(OutDir)%(Identity)</ContentOutput>
+    </ToolkitContentTask>
+  </ItemDefinitionGroup>
+
+</Project>

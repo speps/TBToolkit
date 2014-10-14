@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <ItemGroup>
+    <PropertyPageSchema
+      Include="$(MSBuildThisFileDirectory)$(MSBuildThisFileName).xml" />
+    <AvailableItemName Include="ToolkitContentTask">
+      <Targets>_ToolkitContentTask</Targets>
+    </AvailableItemName>
+  </ItemGroup>
+
+  <PropertyGroup>
+    <ContentFilesProjectOutputGroupDependsOn>$(ContentFilesProjectOutputGroupDependsOn);MakeDirsForToolkitContentTask</ContentFilesProjectOutputGroupDependsOn>
+  </PropertyGroup>
+
+  <!-- Makes the the directories that the task uses -->
+  <Target Name="MakeDirsForToolkitContentTask">
+
+    <ItemGroup Condition="'@(ToolkitContentTask)'!=''">
+      <ToolkitContentTaskDirsToMake Include="@(ToolkitContentOutputs->DirectoryName())" />
+    </ItemGroup>
+
+    <MakeDir Directories="@(ToolkitContentTaskDirsToMake)" />
+
+    <ItemGroup>
+      <ToolkitContentTaskDirsToMake Remove="@(ToolkitContentTaskDirsToMake)" />
+    </ItemGroup>
+  </Target>
+
+  <!-- Inject a custom target into Clean by extending CleanDependsOn -->
+  <PropertyGroup>
+    <CleanDependsOn>
+      $(CleanDependsOn);
+      CustomAfterClean
+    </CleanDependsOn>
+  </PropertyGroup>
+
+
+  <!-- Clean the generated output files -->
+  <Target Name="CustomAfterClean" DependsOnTargets="MakeDirsForToolkitContentTask">
+    <Delete Files="%(ToolkitContentTask.ContentOutput)" />
+  </Target>
+
+  <PropertyGroup>
+    <ContentFilesProjectOutputGroupDependsOn>$(ContentFilesProjectOutputGroupDependsOn);_ToolkitContentTask</ContentFilesProjectOutputGroupDependsOn>
+  </PropertyGroup>
+
+  <Target
+    Name="_ToolkitContentTask"
+    BeforeTargets="$(ToolkitContentTaskBeforeTargets)"
+    AfterTargets="$(ToolkitContentTaskAfterTargets)"
+    Condition="'@(ToolkitContentTask)' != ''"
+    DependsOnTargets="_SelectedFiles;MakeDirsForToolkitContentTask">
+
+    <ItemGroup Condition="'@(SelectedFiles)' != ''">
+      <ToolkitContentTask Remove="@(ToolkitContentTask)" Condition="'%(Identity)' != '@(SelectedFiles)'" />
+    </ItemGroup>
+
+    <Message
+      Importance="High"
+      Text="%(ToolkitContentTask.Identity)"
+    />
+
+    <Copy
+        Condition                    = "'@(ToolkitContentTask)' != '' and '%(ToolkitContentTask.ExcludedFromBuild)'!='true'"
+        SourceFiles                  = "%(ToolkitContentTask.Identity)"
+        DestinationFiles             = "%(ToolkitContentTask.ContentOutput)"
+        >
+      <Output TaskParameter="CopiedFiles" ItemName="ExportedFiles" />
+    </Copy>
+
+    <ItemGroup>
+      <ExportedFiles>
+        <DeploymentContent>True</DeploymentContent>
+        <Link>%(Identity)</Link>
+      </ExportedFiles>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="@(ExportedFiles);" />
+    </ItemGroup>
+
+  </Target>
+
+</Project>
