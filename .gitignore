@@ -4,7 +4,6 @@
 *.sdf
 *.ncb
 *.suo
-*.filters
 *.tlog
 *.obj
 *.res

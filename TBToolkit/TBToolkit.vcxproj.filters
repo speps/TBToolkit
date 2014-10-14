@@ -1,0 +1,123 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="TBToolkit\Common.h" />
+    <ClInclude Include="TBToolkit\Canvas.h" />
+    <ClInclude Include="TBToolkit\Platform.h" />
+    <ClInclude Include="TBToolkit.h" />
+    <ClInclude Include="TBToolkit\Renderer.h" />
+    <ClInclude Include="TBToolkit\Canvas\WindowsCanvas.h">
+      <Filter>Canvas</Filter>
+    </ClInclude>
+    <ClInclude Include="TBToolkit\Renderer\DirectXRenderer.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="External\OpenDDL\ODDLArray.h">
+      <Filter>External\OpenDDL</Filter>
+    </ClInclude>
+    <ClInclude Include="External\OpenDDL\ODDLMap.h">
+      <Filter>External\OpenDDL</Filter>
+    </ClInclude>
+    <ClInclude Include="External\OpenDDL\ODDLString.h">
+      <Filter>External\OpenDDL</Filter>
+    </ClInclude>
+    <ClInclude Include="External\OpenDDL\ODDLTree.h">
+      <Filter>External\OpenDDL</Filter>
+    </ClInclude>
+    <ClInclude Include="External\OpenDDL\ODDLTypes.h">
+      <Filter>External\OpenDDL</Filter>
+    </ClInclude>
+    <ClInclude Include="External\OpenDDL\OpenDDL.h">
+      <Filter>External\OpenDDL</Filter>
+    </ClInclude>
+    <ClInclude Include="External\OpenGEX\OpenGEX.h">
+      <Filter>External\OpenGEX</Filter>
+    </ClInclude>
+    <ClInclude Include="TBToolkit\Renderer\DirectXModel.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="TBToolkit\Shader.h" />
+    <ClInclude Include="TBToolkit\Renderer\DirectXShader.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="TBToolkit\Geometry.h" />
+    <ClInclude Include="TBToolkit\Renderer\DirectXNode.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="TBToolkit\Renderer\DirectXConstants.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="TBToolkit\Texture.h" />
+    <ClInclude Include="External\DDSTextureLoader\DDSTextureLoader.h">
+      <Filter>External\DDSTextureLoader</Filter>
+    </ClInclude>
+    <ClInclude Include="TBToolkit\Renderer\DirectXTexture.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Canvas">
+      <UniqueIdentifier>{bc1a173c-7b03-4a0e-9ab8-b91e6df89852}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer">
+      <UniqueIdentifier>{fd9ad3fe-9682-4832-8c53-731f838db351}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Platform">
+      <UniqueIdentifier>{e6f48ced-64fb-4cef-b768-7b4115c8324e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External">
+      <UniqueIdentifier>{419bd109-9108-4d2d-b098-0e0fd541824b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External\OpenDDL">
+      <UniqueIdentifier>{d15d7c89-3a01-4377-836c-42f59f36e025}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External\OpenGEX">
+      <UniqueIdentifier>{6acb4a8c-f180-455e-801b-d0c67314e879}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External\DDSTextureLoader">
+      <UniqueIdentifier>{dbf9adea-08f2-4cab-8dc7-c1ff698ad216}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="TBToolkit\Canvas\WindowsCanvas.cpp">
+      <Filter>Canvas</Filter>
+    </ClCompile>
+    <ClCompile Include="TBToolkit\Renderer\DirectXRenderer.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="TBToolkit\Platform\WindowsPlatform.cpp">
+      <Filter>Platform</Filter>
+    </ClCompile>
+    <ClCompile Include="External\OpenDDL\ODDLMap.cpp">
+      <Filter>External\OpenDDL</Filter>
+    </ClCompile>
+    <ClCompile Include="External\OpenDDL\ODDLString.cpp">
+      <Filter>External\OpenDDL</Filter>
+    </ClCompile>
+    <ClCompile Include="External\OpenDDL\ODDLTree.cpp">
+      <Filter>External\OpenDDL</Filter>
+    </ClCompile>
+    <ClCompile Include="External\OpenDDL\OpenDDL.cpp">
+      <Filter>External\OpenDDL</Filter>
+    </ClCompile>
+    <ClCompile Include="External\OpenGEX\OpenGEX.cpp">
+      <Filter>External\OpenGEX</Filter>
+    </ClCompile>
+    <ClCompile Include="TBToolkit\Renderer\DirectXModel.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="TBToolkit\Renderer\DirectXShader.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="TBToolkit\Renderer\DirectXNode.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="TBToolkit\Geometry.cpp" />
+    <ClCompile Include="External\DDSTextureLoader\DDSTextureLoader.cpp">
+      <Filter>External\DDSTextureLoader</Filter>
+    </ClCompile>
+    <ClCompile Include="TBToolkit\Renderer\DirectXTexture.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
