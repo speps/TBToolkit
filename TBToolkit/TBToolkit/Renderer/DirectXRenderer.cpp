@@ -6,6 +6,7 @@
 #include <TBToolkit/Renderer/DirectXModel.h>
 #include <TBToolkit/Renderer/DirectXShader.h>
 #include <TBToolkit/Renderer/DirectXTexture.h>
+#include <TBToolkit/Renderer/DirectXStates.h>
 #include <OpenGEX.h>
 #include <d3d11_1.h>
 
@@ -166,6 +167,8 @@ namespace TB
             { { -1.0f, -1.0f, 0.0f }, { 0.0f, 0.0f, 1.0f }, { 0.0f, 1.0f } }
         }, { 0, 3, 1, 1, 3, 2});
 
+        DirectXStateRegistry::init(shared_from_this());
+
         if (mFrame != nullptr)
         {
             mFrame->init(shared_from_this());
@@ -175,6 +178,7 @@ namespace TB
 
     void DirectXRenderer::deinit()
     {
+        DirectXStateRegistry::cleanup();
     }
 
     void DirectXRenderer::render()

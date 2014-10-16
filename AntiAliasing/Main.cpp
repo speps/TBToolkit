@@ -4,6 +4,7 @@
 #include <TBToolkit/Renderer/DirectXTexture.h>
 #include <TBToolkit/Renderer/DirectXModel.h>
 #include <TBToolkit/Renderer/DirectXConstants.h>
+#include <TBToolkit/Renderer/DirectXStates.h>
 
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
@@ -34,8 +35,8 @@ public:
         mPSBasic = mRenderer->loadShader("Content/BasicEffect.hlsl", "MainPS", TB::ShaderType::Pixel);
         mVSScreen = mRenderer->loadShader("Content/Screen.hlsl", "MainVS", TB::ShaderType::Vertex);
         mPSScreen = mRenderer->loadShader("Content/Screen.hlsl", "MainPS", TB::ShaderType::Pixel);
-        mVSSSAA = mRenderer->loadShader("Content/SSAA.hlsl", "MainVS", TB::ShaderType::Vertex);
-        mPSSSAA = mRenderer->loadShader("Content/SSAA.hlsl", "MainPS", TB::ShaderType::Pixel);
+        mVSQuincunxSSAA = mRenderer->loadShader("Content/QuincunxSSAA.hlsl", "MainVS", TB::ShaderType::Vertex);
+        mPSQuincunxSSAA = mRenderer->loadShader("Content/QuincunxSSAA.hlsl", "MainPS", TB::ShaderType::Pixel);
         mTexture = mRenderer->loadTexture("Content/mosaic.dds");
         mSceneRT = std::make_shared<TB::DirectXTexture>(mRenderer, mRenderer->getWidth(), mRenderer->getHeight(), TB::TextureType::Color, TB::TextureFlags::Target | TB::TextureFlags::ShaderResource);
         mOffsetRT = std::make_shared<TB::DirectXTexture>(mRenderer, mRenderer->getWidth(), mRenderer->getHeight(), TB::TextureType::Color, TB::TextureFlags::Target | TB::TextureFlags::ShaderResource);
@@ -183,9 +184,9 @@ public:
             mRenderer->clear(mRenderer->getBackBufferRTV(), math::float4::zero);
             mRenderer->clear(mRenderer->getBackBufferDSV());
 
-            auto vs = std::dynamic_pointer_cast<TB::DirectXShader>(mVSSSAA);
-            auto ps = std::dynamic_pointer_cast<TB::DirectXShader>(mPSSSAA);
-            
+            auto vs = std::dynamic_pointer_cast<TB::DirectXShader>(mVSQuincunxSSAA);
+            auto ps = std::dynamic_pointer_cast<TB::DirectXShader>(mPSQuincunxSSAA);
+
             ID3D11Buffer* constants[] = { mSSAAConstants };
             ID3D11ShaderResourceView* srvs[] =  { *mSceneRT, *mOffsetRT };
             ID3D11SamplerState* samplers[] = { mSampler };
@@ -237,8 +238,8 @@ private:
     std::shared_ptr<TB::Shader> mPSBasic;
     std::shared_ptr<TB::Shader> mVSScreen;
     std::shared_ptr<TB::Shader> mPSScreen;
-    std::shared_ptr<TB::Shader> mVSSSAA;
-    std::shared_ptr<TB::Shader> mPSSSAA;
+    std::shared_ptr<TB::Shader> mVSQuincunxSSAA;
+    std::shared_ptr<TB::Shader> mPSQuincunxSSAA;
     std::shared_ptr<TB::Texture> mTexture;
     TB::ComPtr<ID3D11SamplerState> mSampler;
     std::shared_ptr<TB::DirectXTexture> mSceneRT;

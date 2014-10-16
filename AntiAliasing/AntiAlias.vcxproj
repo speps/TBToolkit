@@ -39,7 +39,7 @@
     </ToolkitContentTask>
   </ItemGroup>
   <ItemGroup>
-    <ToolkitContentTask Include="Content\SSAA.hlsl">
+    <ToolkitContentTask Include="Content\QuincunxSSAA.hlsl">
       <FileType>Document</FileType>
     </ToolkitContentTask>
   </ItemGroup>

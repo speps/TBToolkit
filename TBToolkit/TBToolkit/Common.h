@@ -6,6 +6,14 @@
 
 namespace TB
 {
+    uint32_t hash(const uint8_t* data, size_t len);
+
+    template<typename Type>
+    struct TypeTraits
+    {
+        const char* Name;
+    };
+
     template<typename PtrType>
     class ComPtr
     {

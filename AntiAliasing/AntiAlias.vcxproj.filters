@@ -19,6 +19,6 @@
       <Filter>Content</Filter>
     </ToolkitContentTask>
     <ToolkitContentTask Include="Content\Screen.hlsl" />
-    <ToolkitContentTask Include="Content\SSAA.hlsl" />
+    <ToolkitContentTask Include="Content\QuincunxSSAA.hlsl" />
   </ItemGroup>
 </Project>

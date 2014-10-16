@@ -54,6 +54,9 @@
     <ClInclude Include="TBToolkit\Renderer\DirectXTexture.h">
       <Filter>Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="TBToolkit\Renderer\DirectXStates.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Canvas">
@@ -119,5 +122,9 @@
     <ClCompile Include="TBToolkit\Renderer\DirectXTexture.cpp">
       <Filter>Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="TBToolkit\Renderer\DirectXStates.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="TBToolkit\Common.cpp" />
   </ItemGroup>
 </Project>

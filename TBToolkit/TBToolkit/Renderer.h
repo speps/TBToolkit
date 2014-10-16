@@ -17,6 +17,36 @@ namespace TB
         Compute,
     };
 
+    enum class BlendOp
+    {
+        Add,
+        Substract,
+        ReverseSubstract,
+        Min,
+        Max
+    };
+
+    enum class BlendFactor
+    {
+        Zero,
+        One,
+        SrcColor,
+        InvSrcColor,
+        SrcAlpha,
+        InvSrcAlpha,
+        DestAlpha,
+        InvDestAlpha,
+        DestColor,
+        InvDestColor,
+        SrcAlphaSat,
+        BlendFactor,
+        InvBlendFactor,
+        Src1Color,
+        InvSrc1Color,
+        Src1Alpha,
+        InvSrc1Alpha
+    };
+
     class Renderer
     {
     public:
