@@ -15,10 +15,15 @@ VSOutput MainVS(float4 pos : POSITION, float3 normal : NORMAL, float2 uv : TEXCO
     return vs;
 }
 
+cbuffer ScreenConstants : register(c0)
+{
+    float4 quadColor;
+}
+
 Texture2D<float4> mainTexture : register(t0);
 sampler mainSampler : register(s0);
 
 float4 MainPS(in VSOutput vs) : SV_TARGET0
 {
-    return mainTexture.Sample(mainSampler, vs.uv);
+    return mainTexture.Sample(mainSampler, vs.uv) * quadColor;
 }

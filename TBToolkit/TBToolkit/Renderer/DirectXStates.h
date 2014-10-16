@@ -9,6 +9,7 @@
 
 struct ID3D11DeviceChild;
 struct ID3D11BlendState;
+struct ID3D11DepthStencilState;
 
 namespace TB
 {
@@ -93,6 +94,33 @@ namespace TB
 
     template<>
     struct TypeTraits<DirectXBlendState>
+    {
+        static const char* Name;
+    };
+
+    class DirectXDepthStencilState
+    {
+    private:
+        struct State
+        {
+            bool depthEnable;
+            CompFunc depthFunc;
+
+            uint32_t key() const;
+        };
+
+        static ID3D11DepthStencilState* getOrCreate(const State& state);
+
+    public:
+        template<bool depthEnable = true, CompFunc depthFunc = CompFunc::Less>
+        static ID3D11DepthStencilState* get()
+        {
+            return getOrCreate({ depthEnable, depthFunc });
+        }
+    };
+
+    template<>
+    struct TypeTraits<DirectXDepthStencilState>
     {
         static const char* Name;
     };

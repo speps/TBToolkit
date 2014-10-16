@@ -39,6 +39,22 @@ namespace
         }
         return (D3D11_BLEND)0;
     }
+
+    D3D11_COMPARISON_FUNC translate(TB::CompFunc func)
+    {
+        switch (func)
+        {
+        case TB::CompFunc::Never: return D3D11_COMPARISON_NEVER;
+        case TB::CompFunc::Less: return D3D11_COMPARISON_LESS;
+        case TB::CompFunc::Equal: return D3D11_COMPARISON_EQUAL;
+        case TB::CompFunc::LessEqual: return D3D11_COMPARISON_LESS_EQUAL;
+        case TB::CompFunc::Greater: return D3D11_COMPARISON_GREATER;
+        case TB::CompFunc::NotEqual: return D3D11_COMPARISON_NOT_EQUAL;
+        case TB::CompFunc::GreaterEqual: return D3D11_COMPARISON_GREATER_EQUAL;
+        case TB::CompFunc::Always: return D3D11_COMPARISON_ALWAYS;
+        }
+        return (D3D11_COMPARISON_FUNC)0;
+    }
 }
 
 namespace TB
@@ -74,6 +90,36 @@ namespace TB
             DirectXStateRegistry::registerState<DirectXBlendState>(key, value);
         }
         return (ID3D11BlendState*)(ID3D11DeviceChild*)value;
+    }
+
+    const char* TB::TypeTraits<DirectXDepthStencilState>::Name = "DirectXDepthStencilState";
+
+    uint32_t DirectXDepthStencilState::State::key() const
+    {
+        return hash((uint8_t*)this, sizeof(State));
+    }
+
+    ID3D11DepthStencilState* DirectXDepthStencilState::getOrCreate(const State& state)
+    {
+        auto key = state.key();
+        auto value = DirectXStateRegistry::get<DirectXDepthStencilState>(key);
+        if (!value.isValid())
+        {
+            D3D11_DEPTH_STENCIL_DESC desc = {0};
+            desc.DepthEnable = state.depthEnable;
+            desc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+            desc.DepthFunc = translate(state.depthFunc);
+            desc.StencilEnable = false;
+            desc.StencilReadMask = D3D11_DEFAULT_STENCIL_READ_MASK;
+            desc.StencilWriteMask = D3D11_DEFAULT_STENCIL_WRITE_MASK;
+            desc.FrontFace = { D3D11_STENCIL_OP_KEEP, D3D11_STENCIL_OP_KEEP, D3D11_STENCIL_OP_KEEP, D3D11_COMPARISON_ALWAYS };
+            desc.BackFace = { D3D11_STENCIL_OP_KEEP, D3D11_STENCIL_OP_KEEP, D3D11_STENCIL_OP_KEEP, D3D11_COMPARISON_ALWAYS };
+
+            HRESULT hr = DirectXStateRegistry::getRenderer()->getDevice()->CreateDepthStencilState(&desc, reinterpret_cast<ID3D11DepthStencilState**>(value.getInitRef()));
+            TB::runtimeCheck(hr == S_OK);
+            DirectXStateRegistry::registerState<DirectXDepthStencilState>(key, value);
+        }
+        return (ID3D11DepthStencilState*)(ID3D11DeviceChild*)value;
     }
 }
 

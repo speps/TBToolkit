@@ -47,6 +47,18 @@ namespace TB
         InvSrc1Alpha
     };
 
+    enum class CompFunc
+    {
+        Never,
+        Less,
+        Equal,
+        LessEqual,
+        Greater,
+        NotEqual,
+        GreaterEqual,
+        Always
+    };
+
     class Renderer
     {
     public:

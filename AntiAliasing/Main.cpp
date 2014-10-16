@@ -18,6 +18,11 @@ struct SSAAConstants
     float padding[2];
 };
 
+struct ScreenConstants
+{
+    float quadColor[4];
+};
+
 class DirectXFrame : public TB::IDirectXFrame
 {
 public:
@@ -66,6 +71,12 @@ public:
 
             mSSAAConstants.create(renderer);
             mSSAAConstants.update(ssaa);
+        }
+
+        {
+            ScreenConstants screen = { 1.0f, 1.0f, 1.0f, 1.0f };
+            mScreenConstants.create(renderer);
+            mScreenConstants.update(screen);
         }
 
         // Rasterizer state
@@ -124,7 +135,7 @@ public:
         }
     }
 
-    virtual void render() override
+    void renderQuincunxSSAA()
     {
         auto imc = mRenderer->getImmediateContext();
 
@@ -154,7 +165,7 @@ public:
                 mRenderer->clear(*mOffsetRT, math::float4::zero);
                 mRenderer->clear(mRenderer->getBackBufferDSV());
 
-                updateViewConstants(mCurrentEyePosition, mLookPosition, 0.5f);
+                updateViewConstants(mCurrentEyePosition, mLookPosition, 0.5f, 0.5f);
                 mScene->render();
 
                 imc->OMSetRenderTargets(0, nullptr, nullptr);
@@ -168,7 +179,7 @@ public:
                 mRenderer->clear(*mSceneRT, math::float4::zero);
                 mRenderer->clear(mRenderer->getBackBufferDSV());
 
-                updateViewConstants(mCurrentEyePosition, mLookPosition, 0.0f);
+                updateViewConstants(mCurrentEyePosition, mLookPosition, 0.0f, 0.0f);
                 mScene->render();
 
                 imc->OMSetRenderTargets(0, nullptr, nullptr);
@@ -178,7 +189,6 @@ public:
 
         mRenderer->beginEvent(L"2X Quincunx SSAA");
         {
-
             ID3D11RenderTargetView* rtvs[] = { mRenderer->getBackBufferRTV() };
             imc->OMSetRenderTargets(1, rtvs, mRenderer->getBackBufferDSV());
             mRenderer->clear(mRenderer->getBackBufferRTV(), math::float4::zero);
@@ -206,11 +216,100 @@ public:
             imc->PSSetShaderResources(0, 2, srvsNull);
         }
         mRenderer->endEvent();
+    }
 
+    void renderRGSS()
+    {
+        auto imc = mRenderer->getImmediateContext();
+        
+        // Scene
+        {
+            auto vs = std::dynamic_pointer_cast<TB::DirectXShader>(mVSBasic);
+            auto ps = std::dynamic_pointer_cast<TB::DirectXShader>(mPSBasic);
+            auto tex = std::dynamic_pointer_cast<TB::DirectXTexture>(mTexture);
+
+            ID3D11Buffer* constants[] = { mViewConstants, mWorldConstants };
+            ID3D11ShaderResourceView* srvs[] =  { *tex };
+            ID3D11SamplerState* samplers[] = { mSampler };
+
+            imc->OMSetDepthStencilState(TB::DirectXDepthStencilState::get(), 0);
+            imc->RSSetState(mRSState);
+            imc->IASetInputLayout(mInputLayout);
+            imc->VSSetConstantBuffers(0, 2, constants);
+            imc->VSSetShader(*vs, nullptr, 0);
+            imc->PSSetConstantBuffers(0, 2, constants);
+            imc->PSSetShader(*ps, nullptr, 0);
+            imc->PSSetShaderResources(0, 1, srvs);
+            imc->PSSetSamplers(0, 1, samplers);
+
+            mRenderer->beginEvent(L"Main");
+            {
+                ID3D11RenderTargetView* rtvs[] = { *mSceneRT };
+                imc->OMSetRenderTargets(1, rtvs, mRenderer->getBackBufferDSV());
+                mRenderer->clear(*mSceneRT, math::float4::zero);
+                mRenderer->clear(mRenderer->getBackBufferDSV());
+
+                updateViewConstants(mCurrentEyePosition, mLookPosition, 0.0f, 0.0f);
+                mScene->render();
+
+                imc->OMSetRenderTargets(0, nullptr, nullptr);
+            }
+            mRenderer->endEvent();
+        }
+
+        // Offsets for rotated grid
+        // | | |3| |
+        // |1| | | |
+        // | | | |4|
+        // | |2| | |
+        // 
+        static const math::float2 offsets[] = { { 0.125f, 0.375f }, { 0.375f, 0.875f }, { 0.625f, 0.125f }, { 0.875f, 0.625f } };
+
+        mRenderer->beginEvent(L"RGSS");
+        {
+            ID3D11RenderTargetView* rtvs[] = { mRenderer->getBackBufferRTV() };
+            imc->OMSetRenderTargets(1, rtvs, mRenderer->getBackBufferDSV());
+            mRenderer->clear(mRenderer->getBackBufferRTV(), math::float4::zero);
+            mRenderer->clear(mRenderer->getBackBufferDSV());
+
+            auto vs = std::dynamic_pointer_cast<TB::DirectXShader>(mVSScreen);
+            auto ps = std::dynamic_pointer_cast<TB::DirectXShader>(mPSScreen);
+
+            mScreenConstants.update({ { 1.0f, 1.0f, 1.0f, 0.25f } });
+
+            ID3D11Buffer* constants[] = { mScreenConstants };
+            ID3D11ShaderResourceView* srvs[] =  { *mSceneRT };
+            ID3D11SamplerState* samplers[] = { mSampler };
+
+            imc->RSSetState(mRSState);
+            imc->IASetInputLayout(mInputLayout);
+            imc->VSSetConstantBuffers(0, 0, nullptr);
+            imc->VSSetShader(*vs, nullptr, 0);
+            imc->PSSetConstantBuffers(0, 1, constants);
+            imc->PSSetShader(*ps, nullptr, 0);
+            imc->PSSetShaderResources(0, 1, srvs);
+            imc->PSSetSamplers(0, 1, samplers);
+            imc->OMSetBlendState(TB::DirectXBlendState::get<true, TB::BlendOp::Add, TB::BlendFactor::SrcAlpha, TB::BlendFactor::InvSrcAlpha, TB::BlendOp::Add, TB::BlendFactor::One, TB::BlendFactor::Zero>(), nullptr, 0xffffffff);
+            imc->OMSetDepthStencilState(TB::DirectXDepthStencilState::get<false>(), 0);
+
+            for (int i = 0; i < 4; i++)
+            {
+                mRenderer->drawQuad();
+            }
+
+            ID3D11ShaderResourceView* srvsNull[] =  { nullptr, nullptr };
+            imc->PSSetShaderResources(0, 2, srvsNull);
+        }
+        mRenderer->endEvent();
+    }
+
+    virtual void render() override
+    {
+        renderQuincunxSSAA();
         mFrameIndex++;
     }
 
-    void updateViewConstants(DirectX::XMFLOAT3 eyePos, DirectX::XMFLOAT3 lookPos, float offset)
+    void updateViewConstants(DirectX::XMFLOAT3 eyePos, DirectX::XMFLOAT3 lookPos, float offsetX, float offsetY)
     {
         TB::DirectXViewConstants viewConstants;
 
@@ -218,7 +317,7 @@ public:
         DirectX::XMMATRIX viewMatrix = DirectX::XMMatrixLookAtRH(DirectX::XMLoadFloat3(&eyePos), DirectX::XMLoadFloat3(&lookPos), DirectX::XMLoadFloat3(&up));
         viewConstants.worldToView = DirectX::XMMatrixTranspose(viewMatrix);
 
-        DirectX::XMMATRIX projMatrix = mRenderer->getProjMatrix(0.78f * 0.625f, 1280, 720, 1.0f, offset, -offset);
+        DirectX::XMMATRIX projMatrix = mRenderer->getProjMatrix(0.78f * 0.625f, 1280, 720, 1.0f, offsetX, -offsetY);
         viewConstants.viewToClip = DirectX::XMMatrixTranspose(projMatrix);
 
         mViewConstants.update(viewConstants);
@@ -248,6 +347,7 @@ private:
     TB::DirectXConstants<TB::DirectXViewConstants> mViewConstants;
     TB::DirectXConstants<TB::DirectXWorldConstants> mWorldConstants;
     TB::DirectXConstants<SSAAConstants> mSSAAConstants;
+    TB::DirectXConstants<ScreenConstants> mScreenConstants;
     TB::ComPtr<ID3D11RasterizerState> mRSState;
     TB::ComPtr<ID3D11InputLayout> mInputLayout;
 
