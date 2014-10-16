@@ -12,22 +12,13 @@
     <ToolkitContentTask Include="Content\Scene.ogex">
       <Filter>Content</Filter>
     </ToolkitContentTask>
-    <ToolkitContentTask Include="Content\Example.ogex">
-      <Filter>Content</Filter>
-    </ToolkitContentTask>
     <ToolkitContentTask Include="Content\mosaic.dds">
       <Filter>Content</Filter>
     </ToolkitContentTask>
     <ToolkitContentTask Include="Content\BasicEffect.hlsl">
       <Filter>Content</Filter>
     </ToolkitContentTask>
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="Content\Screen.hlsl">
-      <Filter>Content</Filter>
-    </FxCompile>
-    <FxCompile Include="Content\SSAA.hlsl">
-      <Filter>Content</Filter>
-    </FxCompile>
+    <ToolkitContentTask Include="Content\Screen.hlsl" />
+    <ToolkitContentTask Include="Content\SSAA.hlsl" />
   </ItemGroup>
 </Project>

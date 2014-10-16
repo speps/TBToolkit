@@ -22,9 +22,6 @@
     <ToolkitContentTask Include="Content\mosaic.dds" />
   </ItemGroup>
   <ItemGroup>
-    <ToolkitContentTask Include="Content\Example.ogex">
-      <FileType>Document</FileType>
-    </ToolkitContentTask>
     <ToolkitContentTask Include="Content\Scene.ogex">
       <FileType>Document</FileType>
     </ToolkitContentTask>

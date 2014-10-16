@@ -12,9 +12,6 @@
     <ToolkitContentTask Include="Content\Scene.ogex">
       <Filter>Content</Filter>
     </ToolkitContentTask>
-    <ToolkitContentTask Include="Content\Example.ogex">
-      <Filter>Content</Filter>
-    </ToolkitContentTask>
     <ToolkitContentTask Include="Content\mosaic.dds">
       <Filter>Content</Filter>
     </ToolkitContentTask>
