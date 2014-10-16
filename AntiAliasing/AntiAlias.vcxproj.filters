@@ -22,4 +22,12 @@
       <Filter>Content</Filter>
     </ToolkitContentTask>
   </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Content\Screen.hlsl">
+      <Filter>Content</Filter>
+    </FxCompile>
+    <FxCompile Include="Content\SSAA.hlsl">
+      <Filter>Content</Filter>
+    </FxCompile>
+  </ItemGroup>
 </Project>

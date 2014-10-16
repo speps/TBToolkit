@@ -63,13 +63,11 @@ namespace TB
         }
         if (((int)flags & (int)TextureFlags::DepthStencil) != 0)
         {
-            desc.BindFlags |= D3D11_BIND_DEPTH_STENCIL;
             hr = renderer->getDevice()->CreateDepthStencilView(mResource, nullptr, mDSV.getInitRef());
             TB::runtimeCheck(hr == S_OK);
         }
         if (((int)flags & (int)TextureFlags::ShaderResource) != 0)
         {
-            desc.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
             hr = renderer->getDevice()->CreateShaderResourceView(mResource, nullptr, mSRV.getInitRef());
             TB::runtimeCheck(hr == S_OK);
         }

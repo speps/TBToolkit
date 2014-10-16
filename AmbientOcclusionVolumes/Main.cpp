@@ -177,7 +177,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
     }
 
     auto renderer = TB::CreateDirectXRenderer(canvas, std::make_shared<DirectXFrame>());
-    if (!renderer->init())
+    if (!renderer->init(8))
     {
         return 1;
     }

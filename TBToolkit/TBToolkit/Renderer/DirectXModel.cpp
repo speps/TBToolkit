@@ -9,18 +9,13 @@
 #include <directxmath.h>
 #include <OpenGEX.h>
 
-namespace
-{
-    struct VertexData
-    {
-        DirectX::XMFLOAT3 position;
-        DirectX::XMFLOAT3 normal;
-        DirectX::XMFLOAT2 texCoord;
-    };
-}
-
 namespace TB
 {
+    DirectXModel::DirectXModel(const std::shared_ptr<DirectXRenderer>& renderer)
+        : mRenderer(renderer)
+    {
+    }
+
     DirectXModel::DirectXModel(const std::shared_ptr<DirectXRenderer>& renderer, const OGEX::GeometryObjectStructure& geometryObject)
         : mRenderer(renderer)
     {
@@ -90,20 +85,6 @@ namespace TB
 
                 TB::runtimeCheck(vertexData.size() > 0);
 
-                // Vertex buffer
-                {
-                    D3D11_BUFFER_DESC desc = {0};
-                    desc.Usage = D3D11_USAGE_DEFAULT;
-                    desc.ByteWidth = UINT(sizeof(VertexData) * vertexData.size());
-                    desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-
-                    D3D11_SUBRESOURCE_DATA initData = {0};
-                    initData.pSysMem = &vertexData[0];
-
-                    HRESULT hr = renderer->getDevice()->CreateBuffer(&desc, &initData, mesh.vertexBuffer.getInitRef());
-                    TB::runtimeCheck(hr == S_OK);
-                }
-
                 std::vector<uint32_t> indices;
                 for (auto subNode = meshStructure.GetFirstSubnode(); subNode != nullptr; subNode = subNode->Next())
                 {
@@ -128,19 +109,7 @@ namespace TB
                     }
                 }
 
-                // Index buffer
-                {
-                    D3D11_BUFFER_DESC desc = {0};
-                    desc.Usage = D3D11_USAGE_DEFAULT;
-                    desc.ByteWidth = UINT(sizeof(uint32_t) * indices.size());
-                    desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-
-                    D3D11_SUBRESOURCE_DATA initData = {0};
-                    initData.pSysMem = &indices[0];
-
-                    HRESULT hr = renderer->getDevice()->CreateBuffer(&desc, &initData, mesh.indexBuffer.getInitRef());
-                    TB::runtimeCheck(hr == S_OK);
-                }
+                setupBuffers(mesh, vertexData, indices);
             }
             mMeshes.push_back(mesh);
         }
@@ -148,6 +117,16 @@ namespace TB
 
     DirectXModel::~DirectXModel()
     {
+    }
+
+    void DirectXModel::addMesh(const std::vector<VertexData>& vertices, const std::vector<uint32_t>& indices)
+    {
+        Mesh mesh;
+        setupBuffers(mesh, vertices, indices);
+        Part part = {0};
+        part.indexCount = indices.size();
+        mesh.parts.push_back(part);
+        mMeshes.push_back(mesh);
     }
 
     void DirectXModel::render() const
@@ -168,6 +147,37 @@ namespace TB
                 const auto& part = mesh.parts[j];
                 imc->DrawIndexed((UINT)part.indexCount, (UINT)part.indexStart, 0);
             }
+        }
+    }
+
+    void DirectXModel::setupBuffers(Mesh& mesh, const std::vector<VertexData>& vertices, const std::vector<uint32_t>& indices)
+    {
+        // Vertex buffer
+        {
+            D3D11_BUFFER_DESC desc = {0};
+            desc.Usage = D3D11_USAGE_DEFAULT;
+            desc.ByteWidth = UINT(sizeof(VertexData) * vertices.size());
+            desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+
+            D3D11_SUBRESOURCE_DATA initData = {0};
+            initData.pSysMem = &vertices[0];
+
+            HRESULT hr = mRenderer->getDevice()->CreateBuffer(&desc, &initData, mesh.vertexBuffer.getInitRef());
+            TB::runtimeCheck(hr == S_OK);
+        }
+
+        // Index buffer
+        {
+            D3D11_BUFFER_DESC desc = {0};
+            desc.Usage = D3D11_USAGE_DEFAULT;
+            desc.ByteWidth = UINT(sizeof(uint32_t) * indices.size());
+            desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+
+            D3D11_SUBRESOURCE_DATA initData = {0};
+            initData.pSysMem = &indices[0];
+
+            HRESULT hr = mRenderer->getDevice()->CreateBuffer(&desc, &initData, mesh.indexBuffer.getInitRef());
+            TB::runtimeCheck(hr == S_OK);
         }
     }
 }

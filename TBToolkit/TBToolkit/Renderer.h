@@ -25,7 +25,7 @@ namespace TB
 
         virtual RendererType getType() const = 0;
 
-        virtual bool init() = 0;
+        virtual bool init(int multisampleLevel) = 0;
         virtual void deinit() = 0;
         virtual void render() = 0;
         virtual void update(float delta) = 0;

@@ -18,9 +18,11 @@ namespace TB
     class DirectXModel : public Model
     {
     public:
+        DirectXModel(const std::shared_ptr<class DirectXRenderer>& renderer);
         DirectXModel(const std::shared_ptr<class DirectXRenderer>& renderer, const OGEX::GeometryObjectStructure& geometryObject);
         virtual ~DirectXModel();
 
+        virtual void addMesh(const std::vector<VertexData>& vertices, const std::vector<uint32_t>& indices) override;
         virtual void render() const override;
 
     private:
@@ -43,6 +45,8 @@ namespace TB
 
         std::shared_ptr<class DirectXRenderer> mRenderer;
         Meshes mMeshes;
+
+        void setupBuffers(Mesh& mesh, const std::vector<VertexData>& vertices, const std::vector<uint32_t>& indices);
     };
 }
 

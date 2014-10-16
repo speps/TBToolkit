@@ -55,7 +55,7 @@ namespace TB
 
         virtual RendererType getType() const override { return RendererType::DirectXRenderer; }
 
-        virtual bool init() override;
+        virtual bool init(int multisampleLevel) override;
         virtual void deinit() override;
         virtual void render() override;
         virtual void update(float delta) override;
@@ -65,9 +65,12 @@ namespace TB
         virtual std::shared_ptr<Texture> loadTexture(const std::string& path) override;
 
         void clear(ID3D11RenderTargetView* rtv, const math::float4& color);
-        void clear(ID3D11DepthStencilView* dsv, float depth = 1.0f, int stencil = 0);
+        void clear(ID3D11DepthStencilView* dsv);
+        void clear(ID3D11DepthStencilView* dsv, float depth, int stencil);
 
-        DirectX::XMMATRIX getProjMatrix(float fovAngleY, int viewportW, int viewportH, float nearZ, int offsetX = 0, int offsetY = 0) const;
+        DirectX::XMMATRIX getProjMatrix(float fovAngleY, int viewportW, int viewportH, float nearZ) const;
+        DirectX::XMMATRIX getProjMatrix(float fovAngleY, int viewportW, int viewportH, float nearZ, float offsetX, float offsetY) const;
+
         int32_t getWidth() const { return mWidth; }
         int32_t getHeight() const { return mHeight; }
         const ComPtr<ID3D11Device>& getDevice() const { return mDevice; }
@@ -78,6 +81,8 @@ namespace TB
 
         void beginEvent(const wchar_t* name) const;
         void endEvent() const;
+
+        void drawQuad() const;
 
     private:
         std::shared_ptr<class WindowsCanvas> mCanvas;
@@ -93,6 +98,7 @@ namespace TB
 
         ComPtr<ID3DUserDefinedAnnotation> mUserDefinedAnnotation;
 
+        std::shared_ptr<class DirectXModel> mUnitQuad;
         std::shared_ptr<struct IDirectXFrame> mFrame;
     };
 }

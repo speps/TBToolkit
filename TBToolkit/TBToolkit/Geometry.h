@@ -15,12 +15,20 @@ namespace OGEX
 
 namespace TB
 {
+    struct VertexData
+    {
+        math::float3 position;
+        math::float3 normal;
+        math::float2 texCoord;
+    };
+
     class Model
     {
     public:
         Model() {}
         virtual ~Model() {}
 
+        virtual void addMesh(const std::vector<VertexData>& vertices, const std::vector<uint32_t>& indices) = 0;
         virtual void render() const = 0;
     };
 

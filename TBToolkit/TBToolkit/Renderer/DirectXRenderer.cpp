@@ -32,7 +32,7 @@ namespace TB
         deinit();
     }
 
-    bool DirectXRenderer::init()
+    bool DirectXRenderer::init(int multisampleLevel)
     {
         HWND hwnd = mCanvas->getHwnd();
 
@@ -73,7 +73,7 @@ namespace TB
         sd.BufferDesc.RefreshRate.Denominator = 1;
         sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
         sd.OutputWindow = hwnd;
-        sd.SampleDesc.Count = 1;
+        sd.SampleDesc.Count = multisampleLevel;
         sd.SampleDesc.Quality = 0;
         sd.Windowed = TRUE;
 
@@ -120,7 +120,7 @@ namespace TB
         descDepth.MipLevels = 1;
         descDepth.ArraySize = 1;
         descDepth.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-        descDepth.SampleDesc.Count = 1;
+        descDepth.SampleDesc.Count = multisampleLevel;
         descDepth.SampleDesc.Quality = 0;
         descDepth.Usage = D3D11_USAGE_DEFAULT;
         descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL;
@@ -158,6 +158,14 @@ namespace TB
 
         mImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
+        mUnitQuad = std::make_shared<DirectXModel>(shared_from_this());
+        mUnitQuad->addMesh({
+            { { -1.0f, 1.0f, 0.0f }, { 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f } },
+            { { 1.0f, 1.0f, 0.0f }, { 0.0f, 0.0f, 1.0f }, { 1.0f, 0.0f } },
+            { { 1.0f, -1.0f, 0.0f }, { 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f } },
+            { { -1.0f, -1.0f, 0.0f }, { 0.0f, 0.0f, 1.0f }, { 0.0f, 1.0f } }
+        }, { 0, 3, 1, 1, 3, 2});
+
         if (mFrame != nullptr)
         {
             mFrame->init(shared_from_this());
@@ -192,12 +200,22 @@ namespace TB
         mImmediateContext->ClearRenderTargetView(rtv, clearColor);
     }
 
+    void DirectXRenderer::clear(ID3D11DepthStencilView* dsv)
+    {
+        clear(dsv, 1.0f, 0);
+    }
+
     void DirectXRenderer::clear(ID3D11DepthStencilView* dsv, float depth, int stencil)
     {
         mImmediateContext->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH, depth, (UINT8)stencil);
     }
 
-    DirectX::XMMATRIX DirectXRenderer::getProjMatrix(float fovAngleY, int viewportW, int viewportH, float nearZ, int offsetX, int offsetY) const
+    DirectX::XMMATRIX DirectXRenderer::getProjMatrix(float fovAngleY, int viewportW, int viewportH, float nearZ) const
+    {
+        return getProjMatrix(fovAngleY, viewportW, viewportH, nearZ, 0.0f, 0.0f);
+    }
+
+    DirectX::XMMATRIX DirectXRenderer::getProjMatrix(float fovAngleY, int viewportW, int viewportH, float nearZ, float offsetX, float offsetY) const
     {
         float sinFov;
         float cosFov;
@@ -217,8 +235,8 @@ namespace TB
         M.m[1][2] = 0.0f;
         M.m[1][3] = 0.0f;
 
-        M.m[2][0] = offsetX / (float)viewportW;
-        M.m[2][1] = offsetY / (float)viewportH;
+        M.m[2][0] = offsetX / viewportW;
+        M.m[2][1] = offsetY / viewportH;
         M.m[2][2] = -1.0f;
         M.m[2][3] = -1.0f;
 
@@ -266,6 +284,11 @@ namespace TB
         {
             mUserDefinedAnnotation->EndEvent();
         }
+    }
+
+    void DirectXRenderer::drawQuad() const
+    {
+        mUnitQuad->render();
     }
 
     std::shared_ptr<Renderer> CreateDirectXRenderer(const std::shared_ptr<Canvas>& canvas, const std::shared_ptr<IDirectXFrame>& frame)
