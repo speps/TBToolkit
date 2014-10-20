@@ -20,7 +20,12 @@ namespace TB
     struct DataChunk
     {
     public:
-        DataChunk(std::unique_ptr<uint8_t>& data, size_t size)
+        DataChunk()
+            : mData(), mSize(0)
+        {
+        }
+
+        DataChunk(std::unique_ptr<uint8_t[]>& data, size_t size)
             : mData(std::move(data)), mSize(size)
         {
         }
@@ -52,6 +57,16 @@ namespace TB
             return *this;
         }
 
+        bool isValid() const
+        {
+            return mData != nullptr;
+        }
+
+        uint8_t* release()
+        {
+            return mData.release();
+        }
+
         uint8_t* data() const
         {
             return mData.get();
@@ -63,7 +78,7 @@ namespace TB
         }
 
     private:
-        std::unique_ptr<uint8_t> mData;
+        std::unique_ptr<uint8_t[]> mData;
         size_t mSize;
     };
 
@@ -72,7 +87,9 @@ namespace TB
 
     std::string normalizePath(const std::string& path);
     std::string operator/(const std::string& path, const std::string& suffix);
+    std::string operator~(const std::string& path);
     std::string getCurrentDir();
+
     std::string loadText(const std::string& path);
     DataChunk loadData(const std::string& path);
 

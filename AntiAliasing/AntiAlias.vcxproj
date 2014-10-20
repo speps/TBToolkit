@@ -43,6 +43,16 @@
       <FileType>Document</FileType>
     </ToolkitContentTask>
   </ItemGroup>
+  <ItemGroup>
+    <ToolkitContentTask Include="Content\FXAA311.hlsl">
+      <FileType>Document</FileType>
+    </ToolkitContentTask>
+  </ItemGroup>
+  <ItemGroup>
+    <ToolkitContentTask Include="Content\FXAA.hlsl">
+      <FileType>Document</FileType>
+    </ToolkitContentTask>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{ACCC5416-56D4-4682-8C92-835223CC0D4C}</ProjectGuid>
     <RootNamespace>AntiAlias</RootNamespace>

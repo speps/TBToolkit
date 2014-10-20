@@ -42,6 +42,8 @@ public:
         mPSScreen = mRenderer->loadShader("Content/Screen.hlsl", "MainPS", TB::ShaderType::Pixel);
         mVSQuincunxSSAA = mRenderer->loadShader("Content/QuincunxSSAA.hlsl", "MainVS", TB::ShaderType::Vertex);
         mPSQuincunxSSAA = mRenderer->loadShader("Content/QuincunxSSAA.hlsl", "MainPS", TB::ShaderType::Pixel);
+        mVSFXAA = mRenderer->loadShader("Content/FXAA.hlsl", "MainVS", TB::ShaderType::Vertex);
+        mPSFXAA = mRenderer->loadShader("Content/FXAA.hlsl", "MainPS", TB::ShaderType::Pixel);
         mTexture = mRenderer->loadTexture("Content/mosaic.dds");
         mSceneRT = std::make_shared<TB::DirectXTexture>(mRenderer, mRenderer->getWidth(), mRenderer->getHeight(), TB::TextureType::Color, TB::TextureFlags::Target | TB::TextureFlags::ShaderResource);
         mOffsetRT = std::make_shared<TB::DirectXTexture>(mRenderer, mRenderer->getWidth(), mRenderer->getHeight(), TB::TextureType::Color, TB::TextureFlags::Target | TB::TextureFlags::ShaderResource);
@@ -218,68 +220,175 @@ public:
         mRenderer->endEvent();
     }
 
+    void renderScenePass(ID3D11RenderTargetView* target, const math::float2& offset)
+    {
+        auto imc = mRenderer->getImmediateContext();
+
+        auto vs = std::dynamic_pointer_cast<TB::DirectXShader>(mVSBasic);
+        auto ps = std::dynamic_pointer_cast<TB::DirectXShader>(mPSBasic);
+        auto tex = std::dynamic_pointer_cast<TB::DirectXTexture>(mTexture);
+
+        ID3D11Buffer* constants[] = { mViewConstants, mWorldConstants };
+        ID3D11ShaderResourceView* srvs[] =  { *tex };
+        ID3D11SamplerState* samplers[] = { mSampler };
+
+        imc->OMSetBlendState(TB::DirectXBlendState::get(), nullptr, 0xffffffff);
+        imc->OMSetDepthStencilState(TB::DirectXDepthStencilState::get(), 0);
+        imc->RSSetState(mRSState);
+        imc->IASetInputLayout(mInputLayout);
+        imc->VSSetConstantBuffers(0, 2, constants);
+        imc->VSSetShader(*vs, nullptr, 0);
+        imc->PSSetConstantBuffers(0, 2, constants);
+        imc->PSSetShader(*ps, nullptr, 0);
+        imc->PSSetShaderResources(0, 1, srvs);
+        imc->PSSetSamplers(0, 1, samplers);
+
+        mRenderer->beginEvent(L"Main");
+        {
+            ID3D11RenderTargetView* rtvs[] = { target };
+            imc->OMSetRenderTargets(1, rtvs, mRenderer->getBackBufferDSV());
+            mRenderer->clear(target, math::float4::zero);
+            mRenderer->clear(mRenderer->getBackBufferDSV());
+
+            updateViewConstants(mCurrentEyePosition, mLookPosition, offset.x, offset.y);
+            mScene->render();
+
+            imc->OMSetRenderTargets(0, nullptr, nullptr);
+        }
+        mRenderer->endEvent();
+    }
+
     void renderRGSS()
     {
         auto imc = mRenderer->getImmediateContext();
-        
-        // Scene
-        {
-            auto vs = std::dynamic_pointer_cast<TB::DirectXShader>(mVSBasic);
-            auto ps = std::dynamic_pointer_cast<TB::DirectXShader>(mPSBasic);
-            auto tex = std::dynamic_pointer_cast<TB::DirectXTexture>(mTexture);
-
-            ID3D11Buffer* constants[] = { mViewConstants, mWorldConstants };
-            ID3D11ShaderResourceView* srvs[] =  { *tex };
-            ID3D11SamplerState* samplers[] = { mSampler };
-
-            imc->OMSetDepthStencilState(TB::DirectXDepthStencilState::get(), 0);
-            imc->RSSetState(mRSState);
-            imc->IASetInputLayout(mInputLayout);
-            imc->VSSetConstantBuffers(0, 2, constants);
-            imc->VSSetShader(*vs, nullptr, 0);
-            imc->PSSetConstantBuffers(0, 2, constants);
-            imc->PSSetShader(*ps, nullptr, 0);
-            imc->PSSetShaderResources(0, 1, srvs);
-            imc->PSSetSamplers(0, 1, samplers);
-
-            mRenderer->beginEvent(L"Main");
-            {
-                ID3D11RenderTargetView* rtvs[] = { *mSceneRT };
-                imc->OMSetRenderTargets(1, rtvs, mRenderer->getBackBufferDSV());
-                mRenderer->clear(*mSceneRT, math::float4::zero);
-                mRenderer->clear(mRenderer->getBackBufferDSV());
-
-                updateViewConstants(mCurrentEyePosition, mLookPosition, 0.0f, 0.0f);
-                mScene->render();
-
-                imc->OMSetRenderTargets(0, nullptr, nullptr);
-            }
-            mRenderer->endEvent();
-        }
 
         // Offsets for rotated grid
         // | | |3| |
         // |1| | | |
         // | | | |4|
         // | |2| | |
-        // 
-        static const math::float2 offsets[] = { { 0.125f, 0.375f }, { 0.375f, 0.875f }, { 0.625f, 0.125f }, { 0.875f, 0.625f } };
+        static const math::float2 offsets[] = { { -0.375f, -0.125f }, { -0.125f, 0.375f }, { 0.125f, -0.375f }, { 0.375f, 0.125f } };
+
+        mScreenConstants.update({ { 0.25f, 0.25f, 0.25f, 0.25f } });
 
         mRenderer->beginEvent(L"RGSS");
         {
             ID3D11RenderTargetView* rtvs[] = { mRenderer->getBackBufferRTV() };
-            imc->OMSetRenderTargets(1, rtvs, mRenderer->getBackBufferDSV());
-            mRenderer->clear(mRenderer->getBackBufferRTV(), math::float4::zero);
-            mRenderer->clear(mRenderer->getBackBufferDSV());
+            ID3D11Buffer* constants[] = { mScreenConstants };
+            ID3D11ShaderResourceView* srvs[] =  { *mSceneRT };
+            ID3D11SamplerState* samplers[] = { mSampler };
 
             auto vs = std::dynamic_pointer_cast<TB::DirectXShader>(mVSScreen);
             auto ps = std::dynamic_pointer_cast<TB::DirectXShader>(mPSScreen);
 
-            mScreenConstants.update({ { 1.0f, 1.0f, 1.0f, 0.25f } });
+            for (int i = 0; i < 4; i++)
+            {
+                renderScenePass(*mSceneRT, offsets[i]);
 
+                imc->OMSetRenderTargets(1, rtvs, mRenderer->getBackBufferDSV());
+
+                if (i == 0)
+                {
+                    mRenderer->clear(mRenderer->getBackBufferRTV(), math::float4::zero);
+                    mRenderer->clear(mRenderer->getBackBufferDSV());
+                }
+
+                imc->RSSetState(mRSState);
+                imc->IASetInputLayout(mInputLayout);
+                imc->VSSetConstantBuffers(0, 0, nullptr);
+                imc->VSSetShader(*vs, nullptr, 0);
+                imc->PSSetConstantBuffers(0, 1, constants);
+                imc->PSSetShader(*ps, nullptr, 0);
+                imc->PSSetShaderResources(0, 1, srvs);
+                imc->PSSetSamplers(0, 1, samplers);
+                imc->OMSetBlendState(TB::DirectXBlendState::get<true, TB::BlendOp::Add, TB::BlendFactor::One, TB::BlendFactor::One, TB::BlendOp::Add, TB::BlendFactor::One, TB::BlendFactor::Zero>(), nullptr, 0xffffffff);
+                imc->OMSetDepthStencilState(TB::DirectXDepthStencilState::get<false>(), 0);
+
+                mRenderer->drawQuad();
+
+                ID3D11ShaderResourceView* srvsNull[] =  { nullptr, nullptr };
+                imc->PSSetShaderResources(0, 2, srvsNull);
+            }
+        }
+        mRenderer->endEvent();
+    }
+
+    void render44SS()
+    {
+        auto imc = mRenderer->getImmediateContext();
+
+        math::float2 offsets[16];
+        for (int iy = 0; iy < 4; iy++)
+        {
+            for (int ix = 0; ix < 4; ix++)
+            {
+                offsets[iy * 4 + ix] = math::float2(0.125f + ix / 4.0f, 0.125f + iy / 4.0f) - math::float2(0.5f, 0.5f);
+            }
+        }
+
+        mScreenConstants.update({ { 0.0625f, 0.0625f, 0.0625f, 0.0625f } });
+
+        mRenderer->beginEvent(L"44SS");
+        {
+            ID3D11RenderTargetView* rtvs[] = { mRenderer->getBackBufferRTV() };
             ID3D11Buffer* constants[] = { mScreenConstants };
             ID3D11ShaderResourceView* srvs[] =  { *mSceneRT };
             ID3D11SamplerState* samplers[] = { mSampler };
+
+            auto vs = std::dynamic_pointer_cast<TB::DirectXShader>(mVSScreen);
+            auto ps = std::dynamic_pointer_cast<TB::DirectXShader>(mPSScreen);
+
+            for (int i = 0; i < 16; i++)
+            {
+                renderScenePass(*mSceneRT, offsets[i]);
+
+                imc->OMSetRenderTargets(1, rtvs, mRenderer->getBackBufferDSV());
+
+                if (i == 0)
+                {
+                    mRenderer->clear(mRenderer->getBackBufferRTV(), math::float4::zero);
+                    mRenderer->clear(mRenderer->getBackBufferDSV());
+                }
+
+                imc->RSSetState(mRSState);
+                imc->IASetInputLayout(mInputLayout);
+                imc->VSSetConstantBuffers(0, 0, nullptr);
+                imc->VSSetShader(*vs, nullptr, 0);
+                imc->PSSetConstantBuffers(0, 1, constants);
+                imc->PSSetShader(*ps, nullptr, 0);
+                imc->PSSetShaderResources(0, 1, srvs);
+                imc->PSSetSamplers(0, 1, samplers);
+                imc->OMSetBlendState(TB::DirectXBlendState::get<true, TB::BlendOp::Add, TB::BlendFactor::One, TB::BlendFactor::One, TB::BlendOp::Add, TB::BlendFactor::One, TB::BlendFactor::Zero>(), nullptr, 0xffffffff);
+                imc->OMSetDepthStencilState(TB::DirectXDepthStencilState::get<false>(), 0);
+
+                mRenderer->drawQuad();
+
+                ID3D11ShaderResourceView* srvsNull[] =  { nullptr, nullptr };
+                imc->PSSetShaderResources(0, 2, srvsNull);
+            }
+        }
+        mRenderer->endEvent();
+    }
+
+    void renderFXAA()
+    {
+        renderScenePass(*mSceneRT, math::float2::zero);
+
+        auto imc = mRenderer->getImmediateContext();
+
+        mRenderer->beginEvent(L"FXAA");
+        {
+            ID3D11RenderTargetView* rtvs[] = { mRenderer->getBackBufferRTV() };
+            ID3D11Buffer* constants[] = { mScreenConstants };
+            ID3D11ShaderResourceView* srvs[] =  { *mSceneRT };
+            ID3D11SamplerState* samplers[] = { mSampler };
+
+            auto vs = std::dynamic_pointer_cast<TB::DirectXShader>(mVSFXAA);
+            auto ps = std::dynamic_pointer_cast<TB::DirectXShader>(mPSFXAA);
+
+            imc->OMSetRenderTargets(1, rtvs, mRenderer->getBackBufferDSV());
+            mRenderer->clear(mRenderer->getBackBufferRTV(), math::float4::zero);
+            mRenderer->clear(mRenderer->getBackBufferDSV());
 
             imc->RSSetState(mRSState);
             imc->IASetInputLayout(mInputLayout);
@@ -289,13 +398,10 @@ public:
             imc->PSSetShader(*ps, nullptr, 0);
             imc->PSSetShaderResources(0, 1, srvs);
             imc->PSSetSamplers(0, 1, samplers);
-            imc->OMSetBlendState(TB::DirectXBlendState::get<true, TB::BlendOp::Add, TB::BlendFactor::SrcAlpha, TB::BlendFactor::InvSrcAlpha, TB::BlendOp::Add, TB::BlendFactor::One, TB::BlendFactor::Zero>(), nullptr, 0xffffffff);
+            imc->OMSetBlendState(TB::DirectXBlendState::get(), nullptr, 0xffffffff);
             imc->OMSetDepthStencilState(TB::DirectXDepthStencilState::get<false>(), 0);
 
-            for (int i = 0; i < 4; i++)
-            {
-                mRenderer->drawQuad();
-            }
+            mRenderer->drawQuad();
 
             ID3D11ShaderResourceView* srvsNull[] =  { nullptr, nullptr };
             imc->PSSetShaderResources(0, 2, srvsNull);
@@ -303,9 +409,18 @@ public:
         mRenderer->endEvent();
     }
 
+    void renderNoAA()
+    {
+        renderScenePass(mRenderer->getBackBufferRTV(), math::float2::zero);
+    }
+
     virtual void render() override
     {
-        renderQuincunxSSAA();
+        //renderQuincunxSSAA();
+        //renderRGSS();
+        //render44SS();
+        //renderFXAA();
+        renderNoAA();
         mFrameIndex++;
     }
 
@@ -339,6 +454,8 @@ private:
     std::shared_ptr<TB::Shader> mPSScreen;
     std::shared_ptr<TB::Shader> mVSQuincunxSSAA;
     std::shared_ptr<TB::Shader> mPSQuincunxSSAA;
+    std::shared_ptr<TB::Shader> mVSFXAA;
+    std::shared_ptr<TB::Shader> mPSFXAA;
     std::shared_ptr<TB::Texture> mTexture;
     TB::ComPtr<ID3D11SamplerState> mSampler;
     std::shared_ptr<TB::DirectXTexture> mSceneRT;

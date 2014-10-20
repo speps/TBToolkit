@@ -22,6 +22,37 @@ namespace
         }
         return 0;
     }
+
+    struct D3DInclude : ID3DInclude
+    {
+        std::string currentFile;
+
+        D3DInclude(const std::string& currentFile)
+            : currentFile(currentFile)
+        {
+
+        }
+
+        virtual HRESULT Open(D3D_INCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, LPCVOID *ppData, UINT *pBytes) override
+        {
+            TB::DataChunk data = TB::loadData(pFileName);
+            if (!data.isValid())
+            {
+                return S_FALSE;
+            }
+
+            *ppData = data.release();
+            *pBytes = (UINT)data.size();
+
+            return S_OK;
+        }
+
+        virtual HRESULT Close(LPCVOID pData) override
+        {
+            delete[] pData;
+            return S_OK;
+        }
+    };
 }
 
 namespace TB
@@ -31,7 +62,8 @@ namespace TB
     {
         DataChunk data = loadData(path);
         ComPtr<ID3D10Blob> errors;
-        HRESULT hr = D3DCompile(data.data(), data.size(), path.c_str(), NULL, NULL, entryPoint.c_str(), getTarget(type), D3DCOMPILE_DEBUG, 0, mBlob.getInitRef(), errors.getInitRef());
+        D3DInclude include(getCurrentDir() / path);
+        HRESULT hr = D3DCompile(data.data(), data.size(), path.c_str(), NULL, &include, entryPoint.c_str(), getTarget(type), D3DCOMPILE_DEBUG | D3DCOMPILE_PREFER_FLOW_CONTROL | D3DCOMPILE_SKIP_OPTIMIZATION, 0, mBlob.getInitRef(), errors.getInitRef());
         if (hr != S_OK)
         {
             log("%s", errors->GetBufferPointer());

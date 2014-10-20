@@ -18,7 +18,17 @@
     <ToolkitContentTask Include="Content\BasicEffect.hlsl">
       <Filter>Content</Filter>
     </ToolkitContentTask>
-    <ToolkitContentTask Include="Content\Screen.hlsl" />
-    <ToolkitContentTask Include="Content\QuincunxSSAA.hlsl" />
+    <ToolkitContentTask Include="Content\QuincunxSSAA.hlsl">
+      <Filter>Content</Filter>
+    </ToolkitContentTask>
+    <ToolkitContentTask Include="Content\Screen.hlsl">
+      <Filter>Content</Filter>
+    </ToolkitContentTask>
+    <ToolkitContentTask Include="Content\FXAA.hlsl">
+      <Filter>Content</Filter>
+    </ToolkitContentTask>
+    <ToolkitContentTask Include="Content\FXAA311.hlsl">
+      <Filter>Content</Filter>
+    </ToolkitContentTask>
   </ItemGroup>
 </Project>

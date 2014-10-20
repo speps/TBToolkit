@@ -58,6 +58,16 @@ namespace TB
         return result + rest;
     }
 
+    std::string operator~(const std::string& path)
+    {
+        auto result = normalizePath(path);
+        while (result.back() != '/')
+        {
+            result.pop_back();
+        }
+        return result;
+    }
+
     std::string getCurrentDir()
     {
         char currentDir[MAX_PATH];
@@ -97,7 +107,7 @@ namespace TB
         size_t length = stream.tellg();
         stream.seekg(0, stream.beg);
  
-        std::unique_ptr<uint8_t> data(new uint8_t[length]);
+        std::unique_ptr<uint8_t[]> data(new uint8_t[length]);
         stream.read((char*)data.get(), length);
 
         stream.close();
