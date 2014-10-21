@@ -28,7 +28,7 @@ namespace TB
             Mesh mesh;
             mesh.lodLevel = meshStructure.GetMeshLevel();
             {
-                std::vector<VertexData> vertexData;
+                Vertices vertices;
                 for (auto subNode = meshStructure.GetFirstSubnode(); subNode != nullptr; subNode = subNode->Next())
                 {
                     if (subNode->GetStructureType() == OGEX::kStructureVertexArray)
@@ -39,53 +39,53 @@ namespace TB
 
                         auto& dataStructure = static_cast<const ODDL::DataStructure<ODDL::FloatDataType>&>(*vertexArrayStructure.GetFirstSubnode());
                         int numVertices = dataStructure.GetDataElementCount() / dataStructure.GetArraySize();
-                        if (vertexData.empty())
-                        {
-                            vertexData.resize(numVertices);
-                        }
-                        else
-                        {
-                            TB::runtimeCheck(numVertices == vertexData.size());
-                        }
 
                         if (vertexArrayStructure.GetArrayAttrib() == "position")
                         {
                             TB::runtimeCheck(dataStructure.GetArraySize() == 3);
                             const float* data = &dataStructure.GetDataElement(0);
-                            for (int i = 0; i < numVertices; i++)
-                            {
-                                vertexData[i].position.x = *data++;
-                                vertexData[i].position.y = *data++;
-                                vertexData[i].position.z = *data++;
-                            }
+                            VertexStream stream;
+                            stream.semantic = VertexSemantic::Position;
+                            stream.usageIndex = 0;
+                            stream.elements = 3;
+                            stream.data.resize(numVertices * stream.elements);
+                            memcpy(&stream.data[0], data, stream.data.size() * sizeof(float));
+                            vertices.push_back(stream);
                         }
                         else if (vertexArrayStructure.GetArrayAttrib() == "normal")
                         {
                             TB::runtimeCheck(dataStructure.GetArraySize() == 3);
                             const float* data = &dataStructure.GetDataElement(0);
-                            for (int i = 0; i < numVertices; i++)
-                            {
-                                vertexData[i].normal.x = *data++;
-                                vertexData[i].normal.y = *data++;
-                                vertexData[i].normal.z = *data++;
-                            }
+                            VertexStream stream;
+                            stream.semantic = VertexSemantic::Normal;
+                            stream.usageIndex = 0;
+                            stream.elements = 3;
+                            stream.data.resize(numVertices * stream.elements);
+                            memcpy(&stream.data[0], data, stream.data.size() * sizeof(float));
+                            vertices.push_back(stream);
                         }
                         else if (vertexArrayStructure.GetArrayAttrib() == "texcoord")
                         {
                             TB::runtimeCheck(dataStructure.GetArraySize() == 2);
                             const float* data = &dataStructure.GetDataElement(0);
+                            VertexStream stream;
+                            stream.semantic = VertexSemantic::TexCoord;
+                            stream.usageIndex = 0;
+                            stream.elements = 2;
+                            stream.data.resize(numVertices * stream.elements);
                             for (int i = 0; i < numVertices; i++)
                             {
-                                vertexData[i].texCoord.x = *data++;
-                                vertexData[i].texCoord.y = 1.0f - (*data++);
+                                stream.data[i * stream.elements + 0] = *data++;
+                                stream.data[i * stream.elements + 1] = 1.0f - *data++;
                             }
+                            vertices.push_back(stream);
                         }
                     }
                 }
 
-                TB::runtimeCheck(vertexData.size() > 0);
+                TB::runtimeCheck(vertices.size() > 0);
 
-                std::vector<uint32_t> indices;
+                Indices indices;
                 for (auto subNode = meshStructure.GetFirstSubnode(); subNode != nullptr; subNode = subNode->Next())
                 {
                     if (subNode->GetStructureType() == OGEX::kStructureIndexArray)
@@ -109,7 +109,7 @@ namespace TB
                     }
                 }
 
-                setupBuffers(mesh, vertexData, indices);
+                setupBuffers(mesh, vertices, indices);
             }
             mMeshes.push_back(mesh);
         }
@@ -119,7 +119,7 @@ namespace TB
     {
     }
 
-    void DirectXModel::addMesh(const std::vector<VertexData>& vertices, const std::vector<uint32_t>& indices)
+    void DirectXModel::addMesh(const Vertices& vertices, const Indices& indices)
     {
         Mesh mesh;
         setupBuffers(mesh, vertices, indices);
@@ -136,10 +136,7 @@ namespace TB
         {
             const auto& mesh = mMeshes[i];
 
-            const UINT stride[] = { sizeof(VertexData) };
-            const UINT offset[] = { 0 };
-            ID3D11Buffer* buffers[] = { mesh.vertexBuffer };
-            imc->IASetVertexBuffers(0, 1, buffers, stride, offset);
+            imc->IASetVertexBuffers(0, (UINT)mesh.vertexBuffers.size(), &mesh.transientBuffers[0], &mesh.transientStrides[0], &mesh.transientOffsets[0]);
             imc->IASetIndexBuffer(mesh.indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
             for (size_t j = 0; j < mesh.parts.size(); j++)
@@ -150,20 +147,28 @@ namespace TB
         }
     }
 
-    void DirectXModel::setupBuffers(Mesh& mesh, const std::vector<VertexData>& vertices, const std::vector<uint32_t>& indices)
+    void DirectXModel::setupBuffers(Mesh& mesh, const Vertices& vertices, const Indices& indices)
     {
-        // Vertex buffer
+        // Vertex buffers
+        mesh.vertexBuffers.resize(vertices.size());
+        for (size_t i = 0; i < vertices.size(); i++)
         {
+            const auto& stream = vertices[i];
+
             D3D11_BUFFER_DESC desc = {0};
             desc.Usage = D3D11_USAGE_DEFAULT;
-            desc.ByteWidth = UINT(sizeof(VertexData) * vertices.size());
+            desc.ByteWidth = UINT(stream.data.size() * sizeof(float));
             desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 
             D3D11_SUBRESOURCE_DATA initData = {0};
-            initData.pSysMem = &vertices[0];
+            initData.pSysMem = &stream.data[0];
 
-            HRESULT hr = mRenderer->getDevice()->CreateBuffer(&desc, &initData, mesh.vertexBuffer.getInitRef());
+            HRESULT hr = mRenderer->getDevice()->CreateBuffer(&desc, &initData, mesh.vertexBuffers[i].getInitRef());
             TB::runtimeCheck(hr == S_OK);
+
+            mesh.transientBuffers[i] = mesh.vertexBuffers[i];
+            mesh.transientStrides[i] = stream.elements * sizeof(float);
+            mesh.transientOffsets[i] = 0;
         }
 
         // Index buffer

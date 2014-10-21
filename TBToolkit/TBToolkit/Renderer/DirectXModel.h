@@ -5,6 +5,7 @@
 #include <TBToolkit/Common.h>
 #include <TBToolkit/Geometry.h>
 #include <memory>
+#include <array>
 
 struct ID3D11Buffer;
 
@@ -22,7 +23,7 @@ namespace TB
         DirectXModel(const std::shared_ptr<class DirectXRenderer>& renderer, const OGEX::GeometryObjectStructure& geometryObject);
         virtual ~DirectXModel();
 
-        virtual void addMesh(const std::vector<VertexData>& vertices, const std::vector<uint32_t>& indices) override;
+        virtual void addMesh(const Vertices& vertices, const Indices& indices) override;
         virtual void render() const override;
 
     private:
@@ -36,17 +37,21 @@ namespace TB
 
         struct Mesh
         {
-            ComPtr<ID3D11Buffer> vertexBuffer;
+            std::vector<ComPtr<ID3D11Buffer>> vertexBuffers;
             ComPtr<ID3D11Buffer> indexBuffer;
             Parts parts;
             uint32_t lodLevel;
+
+            std::array<ID3D11Buffer*, 32> transientBuffers;
+            std::array<uint32_t, 32> transientStrides;
+            std::array<uint32_t, 32> transientOffsets;
         };
         typedef std::vector<Mesh> Meshes;
 
         std::shared_ptr<class DirectXRenderer> mRenderer;
         Meshes mMeshes;
 
-        void setupBuffers(Mesh& mesh, const std::vector<VertexData>& vertices, const std::vector<uint32_t>& indices);
+        void setupBuffers(Mesh& mesh, const Vertices& vertices, const Indices& indices);
     };
 }
 

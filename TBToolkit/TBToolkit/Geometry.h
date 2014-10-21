@@ -15,12 +15,23 @@ namespace OGEX
 
 namespace TB
 {
-    struct VertexData
+    enum class VertexSemantic
     {
-        math::float3 position;
-        math::float3 normal;
-        math::float2 texCoord;
+        Position,
+        Normal,
+        TexCoord
     };
+
+    struct VertexStream
+    {
+        VertexSemantic semantic;
+        int usageIndex;
+        std::vector<float> data;
+        int elements;
+    };
+
+    typedef std::vector<VertexStream> Vertices;
+    typedef std::vector<uint32_t> Indices;
 
     class Model
     {
@@ -28,7 +39,7 @@ namespace TB
         Model() {}
         virtual ~Model() {}
 
-        virtual void addMesh(const std::vector<VertexData>& vertices, const std::vector<uint32_t>& indices) = 0;
+        virtual void addMesh(const Vertices& vertices, const Indices& indices) = 0;
         virtual void render() const = 0;
     };
 
