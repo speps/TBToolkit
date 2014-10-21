@@ -46,22 +46,7 @@ namespace TB
             }
             fakeVSCode << "};";
 
-            fakeVSCode << "struct VSOutput";
-            fakeVSCode << "{ float4 pos : SV_POSITION;";
-            for (size_t i = 0; i < vertices.size(); i++)
-            {
-                const auto& stream = vertices[i];
-                fakeVSCode << memberTypes[stream.elements] << " _" << i << " : " << semantics[(int)stream.semantic] << stream.usageIndex << ";";
-            }
-            fakeVSCode << "};";
-
-            fakeVSCode << "VSOutput MainVS(VSInput input) { VSOutput vs = (VSOutput)0; vs.pos = float4(0, 0, 0, 1);";
-            for (size_t i = 0; i < vertices.size(); i++)
-            {
-                const auto& stream = vertices[i];
-                fakeVSCode << "vs._" << i << " = " << "input._" << i << ";";
-            }
-            fakeVSCode << " return vs; }";
+            fakeVSCode << "float4 MainVS(VSInput input) : SV_POSITION { return float4(0, 0, 0, 1); }";
 
             DirectXShader fakeVS(mRenderer, DataChunk(fakeVSCode.str()), "MainVS", ShaderType::Vertex);
 
