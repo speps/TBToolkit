@@ -7,6 +7,7 @@
 #include <TBToolkit/Renderer/DirectXShader.h>
 #include <TBToolkit/Renderer/DirectXTexture.h>
 #include <TBToolkit/Renderer/DirectXStates.h>
+#include <TBToolkit/Renderer/DirectXInputLayout.h>
 #include <OpenGEX.h>
 #include <d3d11_1.h>
 
@@ -159,6 +160,9 @@ namespace TB
 
         mImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
+        DirectXStateRegistry::init(shared_from_this());
+        DirectXInputLayoutRegistry::init(shared_from_this());
+
         mUnitQuad = std::make_shared<DirectXModel>(shared_from_this());
         Vertices quadVertices;
         mUnitQuad->addMesh({
@@ -166,8 +170,6 @@ namespace TB
             { VertexSemantic::Normal, 0, { 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f }, 3 },
             { VertexSemantic::TexCoord, 0, { 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f }, 2 }
         }, { 0, 3, 1, 1, 3, 2});
-
-        DirectXStateRegistry::init(shared_from_this());
 
         if (mFrame != nullptr)
         {
@@ -179,6 +181,7 @@ namespace TB
     void DirectXRenderer::deinit()
     {
         DirectXStateRegistry::cleanup();
+        DirectXInputLayoutRegistry::cleanup();
     }
 
     void DirectXRenderer::render()

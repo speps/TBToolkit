@@ -25,10 +25,10 @@ struct VSOutput
     float2 uv : TEXCOORD0;
 };
 
-VSOutput MainVS(float4 pos : POSITION, float3 normal : NORMAL, float2 uv : TEXCOORD0)
+VSOutput MainVS(float3 pos : POSITION, float3 normal : NORMAL, float2 uv : TEXCOORD0)
 {
     VSOutput vs = (VSOutput)0;
-    vs.position = mul(mul(mul(pos, localToWorld), worldToView), viewToClip);
+    vs.position = mul(mul(mul(float4(pos, 1), localToWorld), worldToView), viewToClip);
     vs.normal = mul(float4(normal, 0), localToWorld).xyz;
     vs.uv = uv;
     return vs;

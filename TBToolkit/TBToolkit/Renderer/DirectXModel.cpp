@@ -1,13 +1,16 @@
 #include <TBToolkit/Platform.h>
 #if TB_PLATFORM_WINDOWS
 
-#include <map>
 #include <TBToolkit/Common.h>
 #include <TBToolkit/Renderer/DirectXRenderer.h>
 #include <TBToolkit/Renderer/DirectXModel.h>
+#include <TBToolkit/Renderer/DirectXShader.h>
+#include <TBToolkit/Renderer/DirectXInputLayout.h>
 #include <d3d11.h>
 #include <directxmath.h>
 #include <OpenGEX.h>
+#include <map>
+#include <sstream>
 
 namespace TB
 {
@@ -136,6 +139,7 @@ namespace TB
         {
             const auto& mesh = mMeshes[i];
 
+            imc->IASetInputLayout(DirectXInputLayoutRegistry::get(mesh.inputLayoutID));
             imc->IASetVertexBuffers(0, (UINT)mesh.vertexBuffers.size(), &mesh.transientBuffers[0], &mesh.transientStrides[0], &mesh.transientOffsets[0]);
             imc->IASetIndexBuffer(mesh.indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
@@ -184,6 +188,8 @@ namespace TB
             HRESULT hr = mRenderer->getDevice()->CreateBuffer(&desc, &initData, mesh.indexBuffer.getInitRef());
             TB::runtimeCheck(hr == S_OK);
         }
+
+        mesh.inputLayoutID = DirectXInputLayoutRegistry::create(vertices);
     }
 }
 

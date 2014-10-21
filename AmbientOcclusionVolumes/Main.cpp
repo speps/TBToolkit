@@ -85,21 +85,6 @@ public:
             HRESULT hr = mRenderer->getDevice()->CreateSamplerState(&desc, mSampler.getInitRef());
             TB::runtimeCheck(hr == S_OK);
         }
-
-        // Input layout
-        {
-            const D3D11_INPUT_ELEMENT_DESC layout[] =
-            {
-                { "POSITION",  0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
-                { "NORMAL",    0, DXGI_FORMAT_R32G32B32_FLOAT, 1, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-                { "TEXCOORD",  0, DXGI_FORMAT_R32G32_FLOAT,    2, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-            };
-
-            auto vs = std::dynamic_pointer_cast<TB::DirectXShader>(mVertexShader);
-
-            HRESULT hr = mRenderer->getDevice()->CreateInputLayout(layout, 3, vs->getBlob()->GetBufferPointer(), vs->getBlob()->GetBufferSize(), mInputLayout.getInitRef());
-            TB::runtimeCheck(hr == S_OK);
-        }
     }
 
     virtual void render() override
@@ -114,7 +99,6 @@ public:
         ID3D11SamplerState* samplers[] = { mSampler };
 
         imc->RSSetState(mRSState);
-        imc->IASetInputLayout(mInputLayout);
         imc->VSSetConstantBuffers(0, 2, constants);
         imc->VSSetShader(*vs, nullptr, 0);
         imc->PSSetConstantBuffers(0, 2, constants);
@@ -161,7 +145,6 @@ private:
     TB::DirectXConstants<TB::DirectXViewConstants> mViewConstants;
     TB::DirectXConstants<TB::DirectXWorldConstants> mWorldConstants;
     TB::ComPtr<ID3D11RasterizerState> mRSState;
-    TB::ComPtr<ID3D11InputLayout> mInputLayout;
 
     float mTimer;
     DirectX::XMFLOAT3 mEyePosition;

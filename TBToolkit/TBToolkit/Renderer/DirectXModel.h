@@ -8,6 +8,7 @@
 #include <array>
 
 struct ID3D11Buffer;
+struct ID3D11InputLayout;
 
 namespace OGEX
 {
@@ -45,6 +46,8 @@ namespace TB
             std::array<ID3D11Buffer*, 32> transientBuffers;
             std::array<uint32_t, 32> transientStrides;
             std::array<uint32_t, 32> transientOffsets;
+
+            uint32_t inputLayoutID;
         };
         typedef std::vector<Mesh> Meshes;
 

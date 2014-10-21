@@ -87,12 +87,14 @@
     <LinkIncremental>false</LinkIncremental>
     <IntDir>$(SolutionDir)Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)Binaries\$(ProjectName)\</OutDir>
+    <TargetName>$(ProjectName)$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>..\DirectXTK\Inc;$(IncludePath)</IncludePath>
     <LinkIncremental>false</LinkIncremental>
     <IntDir>$(SolutionDir)Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)Binaries\$(ProjectName)\</OutDir>
+    <TargetName>$(ProjectName)$(Configuration)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>

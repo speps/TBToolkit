@@ -24,6 +24,7 @@
     <ClInclude Include="TBToolkit\Common.h" />
     <ClInclude Include="TBToolkit\Canvas.h" />
     <ClInclude Include="TBToolkit\Geometry.h" />
+    <ClInclude Include="TBToolkit\Renderer\DirectXInputLayout.h" />
     <ClInclude Include="TBToolkit\Renderer\DirectXStates.h" />
     <ClInclude Include="TBToolkit\Renderer\DirectXTexture.h" />
     <ClInclude Include="TBToolkit\Texture.h" />
@@ -47,6 +48,7 @@
     <ClCompile Include="TBToolkit\Common.cpp" />
     <ClCompile Include="TBToolkit\Geometry.cpp" />
     <ClCompile Include="TBToolkit\Platform\WindowsPlatform.cpp" />
+    <ClCompile Include="TBToolkit\Renderer\DirectXInputLayout.cpp" />
     <ClCompile Include="TBToolkit\Renderer\DirectXModel.cpp" />
     <ClCompile Include="TBToolkit\Renderer\DirectXNode.cpp" />
     <ClCompile Include="TBToolkit\Renderer\DirectXRenderer.cpp" />

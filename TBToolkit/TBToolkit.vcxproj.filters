@@ -57,6 +57,9 @@
     <ClInclude Include="TBToolkit\Renderer\DirectXStates.h">
       <Filter>Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="TBToolkit\Renderer\DirectXInputLayout.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Canvas">
@@ -126,5 +129,8 @@
       <Filter>Renderer</Filter>
     </ClCompile>
     <ClCompile Include="TBToolkit\Common.cpp" />
+    <ClCompile Include="TBToolkit\Renderer\DirectXInputLayout.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

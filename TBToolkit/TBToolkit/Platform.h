@@ -25,6 +25,13 @@ namespace TB
         {
         }
 
+        explicit DataChunk(const std::string& str)
+            : mData(), mSize(str.size())
+        {
+            mData.reset(new uint8_t[mSize]);
+            memcpy(mData.get(), str.c_str(), mSize);
+        }
+
         DataChunk(std::unique_ptr<uint8_t[]>& data, size_t size)
             : mData(std::move(data)), mSize(size)
         {

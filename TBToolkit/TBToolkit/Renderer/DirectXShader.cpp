@@ -57,13 +57,28 @@ namespace
 
 namespace TB
 {
+    DirectXShader::DirectXShader(const std::shared_ptr<DirectXRenderer>& renderer, const DataChunk& data, const std::string& entryPoint, ShaderType type)
+        : Shader(entryPoint, type)
+    {
+        compileShader(renderer, data, nullptr, entryPoint, type);
+    }
+
     DirectXShader::DirectXShader(const std::shared_ptr<DirectXRenderer>& renderer, const std::string& path, const std::string& entryPoint, ShaderType type)
-        : Shader(path, entryPoint, type)
+        : Shader(entryPoint, type)
     {
         DataChunk data = loadData(path);
+        D3DInclude includes(getCurrentDir() / path);
+        compileShader(renderer, data, &includes, entryPoint, type);
+    }
+
+    DirectXShader::~DirectXShader()
+    {
+    }
+
+    void DirectXShader::compileShader(const std::shared_ptr<class DirectXRenderer>& renderer, DataChunk data, ID3DInclude* includes, const std::string& entryPoint, ShaderType type)
+    {
         ComPtr<ID3D10Blob> errors;
-        D3DInclude include(getCurrentDir() / path);
-        HRESULT hr = D3DCompile(data.data(), data.size(), path.c_str(), NULL, &include, entryPoint.c_str(), getTarget(type), D3DCOMPILE_DEBUG | D3DCOMPILE_PREFER_FLOW_CONTROL | D3DCOMPILE_SKIP_OPTIMIZATION, 0, mBlob.getInitRef(), errors.getInitRef());
+        HRESULT hr = D3DCompile(data.data(), data.size(), "", NULL, includes, entryPoint.c_str(), getTarget(type), D3DCOMPILE_DEBUG | D3DCOMPILE_PREFER_FLOW_CONTROL | D3DCOMPILE_SKIP_OPTIMIZATION, 0, mBlob.getInitRef(), errors.getInitRef());
         if (hr != S_OK)
         {
             log("%s", errors->GetBufferPointer());
@@ -81,10 +96,7 @@ namespace TB
             TB::runtimeCheck(hr == S_OK);
             break;
         }
-    }
 
-    DirectXShader::~DirectXShader()
-    {
     }
 }
 
