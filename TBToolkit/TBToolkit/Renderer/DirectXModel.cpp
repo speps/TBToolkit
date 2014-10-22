@@ -15,12 +15,17 @@
 namespace TB
 {
     DirectXModel::DirectXModel(const std::shared_ptr<DirectXRenderer>& renderer)
-        : mRenderer(renderer)
+        : mRenderer(renderer), mMeshModifier(nullptr)
     {
     }
 
-    DirectXModel::DirectXModel(const std::shared_ptr<DirectXRenderer>& renderer, const OGEX::GeometryObjectStructure& geometryObject)
-        : mRenderer(renderer)
+    DirectXModel::DirectXModel(const std::shared_ptr<DirectXRenderer>& renderer, const MeshModifierCallback& meshModifier)
+        : mRenderer(renderer), mMeshModifier(meshModifier)
+    {
+    }
+
+    DirectXModel::DirectXModel(const std::shared_ptr<DirectXRenderer>& renderer, const OGEX::GeometryObjectStructure& geometryObject, const MeshModifierCallback& meshModifier)
+        : mRenderer(renderer), mMeshModifier(meshModifier)
     {
         auto& meshMap = *geometryObject.GetMeshMap();
         for (int32_t i = 0; i < meshMap.GetElementCount(); i++)
@@ -112,6 +117,10 @@ namespace TB
                     }
                 }
 
+                if (mMeshModifier != nullptr)
+                {
+                    mMeshModifier(vertices, indices);
+                }
                 setupBuffers(mesh, vertices, indices);
             }
             mMeshes.push_back(mesh);

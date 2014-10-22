@@ -257,11 +257,16 @@ namespace TB
 
     std::shared_ptr<Scene> DirectXRenderer::loadScene(const std::string& path)
     {
+        return loadScene(path, nullptr);
+    }
+
+    std::shared_ptr<Scene> DirectXRenderer::loadScene(const std::string& path, const MeshModifierCallback& meshModifier)
+    {
         OGEX::OpenGexDataDescription dataDesc;
         ODDL::DataResult result = dataDesc.ProcessText(loadText(path).c_str());
         if (result == ODDL::kDataOkay)
         {
-            return std::make_shared<Scene>(shared_from_this(), dataDesc);
+            return std::make_shared<Scene>(shared_from_this(), dataDesc, meshModifier);
         }
 
         return nullptr;

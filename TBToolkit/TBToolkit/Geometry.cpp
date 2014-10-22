@@ -11,13 +11,13 @@
 
 namespace
 {
-    std::shared_ptr<TB::Model> createModel(const std::shared_ptr<class TB::Renderer>& renderer, const OGEX::GeometryObjectStructure& geometryObject)
+    std::shared_ptr<TB::Model> createModel(const std::shared_ptr<class TB::Renderer>& renderer, const OGEX::GeometryObjectStructure& geometryObject, const TB::MeshModifierCallback& meshModifier)
     {
 #if TB_PLATFORM_WINDOWS
         auto directXRenderer = std::dynamic_pointer_cast<TB::DirectXRenderer>(renderer);
         if (directXRenderer)
         {
-            return std::make_shared<TB::DirectXModel>(directXRenderer, geometryObject);
+            return std::make_shared<TB::DirectXModel>(directXRenderer, geometryObject, meshModifier);
         }
 #endif
         return nullptr;
@@ -38,13 +38,13 @@ namespace
 
 namespace TB
 {
-    Scene::Scene(const std::shared_ptr<class Renderer>& renderer, const OGEX::OpenGexDataDescription& dataDesc)
+    Scene::Scene(const std::shared_ptr<class Renderer>& renderer, const OGEX::OpenGexDataDescription& dataDesc, const MeshModifierCallback& meshModifier)
     {
         for (const auto* structure = dataDesc.GetRootStructure()->GetFirstSubnode(); structure != nullptr; structure = structure->Next())
         {
             if (structure->GetStructureType() == OGEX::kStructureGeometryObject)
             {
-                mModels.emplace(structure->GetStructureName(), createModel(renderer, static_cast<const OGEX::GeometryObjectStructure&>(*structure)));
+                mModels.emplace(structure->GetStructureName(), createModel(renderer, static_cast<const OGEX::GeometryObjectStructure&>(*structure), meshModifier));
             }
             if (structure->GetBaseStructureType() == OGEX::kStructureNode)
             {

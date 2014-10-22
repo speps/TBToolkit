@@ -1,6 +1,7 @@
 #pragma once
 
 #include <TBToolkit/Platform.h>
+#include <TBToolkit/Geometry.h>
 #include <memory>
 #include <string>
 #include <functional>
@@ -73,6 +74,7 @@ namespace TB
         virtual void update(float delta) = 0;
 
         virtual std::shared_ptr<class Scene> loadScene(const std::string& path) = 0;
+        virtual std::shared_ptr<class Scene> loadScene(const std::string& path, const MeshModifierCallback& meshModifier) = 0;
         virtual std::shared_ptr<class Shader> loadShader(const std::string& path, const std::string& entryPoint, ShaderType type) = 0;
         virtual std::shared_ptr<class Texture> loadTexture(const std::string& path) = 0;
     };

@@ -5,6 +5,7 @@
 #include <memory>
 #include <map>
 #include <string>
+#include <functional>
 
 namespace OGEX
 {
@@ -32,6 +33,7 @@ namespace TB
 
     typedef std::vector<VertexStream> Vertices;
     typedef std::vector<uint32_t> Indices;
+    typedef std::function<void(Vertices& vertices, Indices& indices)> MeshModifierCallback;
 
     class Model
     {
@@ -62,7 +64,7 @@ namespace TB
     class Scene
     {
     public:
-        Scene(const std::shared_ptr<class Renderer>& renderer, const OGEX::OpenGexDataDescription& dataDesc);
+        Scene(const std::shared_ptr<class Renderer>& renderer, const OGEX::OpenGexDataDescription& dataDesc, const MeshModifierCallback& meshModifier);
         virtual ~Scene() {}
 
         void render() const;

@@ -61,6 +61,7 @@ namespace TB
         virtual void update(float delta) override;
 
         virtual std::shared_ptr<class Scene> loadScene(const std::string& path) override;
+        virtual std::shared_ptr<class Scene> loadScene(const std::string& path, const MeshModifierCallback& meshModifier) override;
         virtual std::shared_ptr<Shader> loadShader(const std::string& path, const std::string& entryPoint, ShaderType type) override;
         virtual std::shared_ptr<Texture> loadTexture(const std::string& path) override;
 
