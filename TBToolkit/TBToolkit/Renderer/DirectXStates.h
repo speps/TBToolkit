@@ -10,6 +10,7 @@
 struct ID3D11DeviceChild;
 struct ID3D11BlendState;
 struct ID3D11DepthStencilState;
+struct ID3D11SamplerState;
 
 namespace TB
 {
@@ -121,6 +122,33 @@ namespace TB
 
     template<>
     struct TypeTraits<DirectXDepthStencilState>
+    {
+        static const char* Name;
+    };
+
+    class DirectXSamplerState
+    {
+    private:
+        struct State
+        {
+            FilterMode filter;
+            AddressMode addrU, addrV, addrW;
+
+            uint32_t key() const;
+        };
+
+        static ID3D11SamplerState* getOrCreate(const State& state);
+
+    public:
+        template<FilterMode filter = FilterMode::MinMagMipLinear, AddressMode addrU = AddressMode::Clamp, AddressMode addrV = AddressMode::Clamp, AddressMode addrW = AddressMode::Clamp>
+        static ID3D11SamplerState* get()
+        {
+            return getOrCreate({ filter, addrU, addrV, addrW });
+        }
+    };
+
+    template<>
+    struct TypeTraits<DirectXSamplerState>
     {
         static const char* Name;
     };

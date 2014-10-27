@@ -17,7 +17,7 @@ namespace TB
     {
         TB::runtimeCheck(vertices.size() > 0);
 
-        const char* semantics[] = { "POSITION", "NORMAL", "TEXCOORD" };
+        const char* semantics[] = { "POSITION", "NORMAL", "TEXCOORD", "COLOR" };
         const DXGI_FORMAT formats[] = { DXGI_FORMAT(0), DXGI_FORMAT_R32_FLOAT, DXGI_FORMAT_R32G32_FLOAT, DXGI_FORMAT_R32G32B32_FLOAT, DXGI_FORMAT_R32G32B32A32_FLOAT };
 
         // Input layout elements

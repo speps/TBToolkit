@@ -32,10 +32,135 @@ public:
     {
     }
 
+    static void modifierTriangleUnique(TB::Vertices& vertices, TB::Indices& indices)
+    {
+        TB::Indices triNew;
+        triNew.reserve(indices.size());
+
+        TB::Vertices vertsNew;
+        vertsNew.reserve(vertices.size());
+
+        size_t numTris = indices.size() / 3;
+        for (size_t sIndex = 0; sIndex < vertices.size(); sIndex++)
+        {
+            TB::VertexStream s = vertices[sIndex];
+
+            std::vector<float> dataNew;
+            dataNew.reserve(indices.size());
+
+            for (size_t triIndex = 0; triIndex < numTris; triIndex++)
+            {
+                uint32_t i0 = indices[triIndex * 3 + 0];
+                uint32_t i1 = indices[triIndex * 3 + 1];
+                uint32_t i2 = indices[triIndex * 3 + 2];
+
+                for (size_t vIndex = 0; vIndex < s.elements; vIndex++)
+                {
+                    dataNew.push_back(s.data[i0 * s.elements + vIndex]);
+                }
+                for (size_t vIndex = 0; vIndex < s.elements; vIndex++)
+                {
+                    dataNew.push_back(s.data[i1 * s.elements + vIndex]);
+                }
+                for (size_t vIndex = 0; vIndex < s.elements; vIndex++)
+                {
+                    dataNew.push_back(s.data[i2 * s.elements + vIndex]);
+                }
+            }
+
+            TB::VertexStream sNew = s;
+            sNew.data = dataNew;
+            vertsNew.push_back(sNew);
+        }
+
+        for (size_t triIndex = 0; triIndex < numTris; triIndex++)
+        {
+            triNew.push_back(uint32_t(triIndex * 3 + 0));
+            triNew.push_back(uint32_t(triIndex * 3 + 1));
+            triNew.push_back(uint32_t(triIndex * 3 + 2));
+        }
+
+        vertices = vertsNew;
+        indices = triNew;
+    }
+
+    static void modifierTriangleVerts(TB::Vertices& vertices, TB::Indices& indices)
+    {
+        const std::vector<float>& pos = vertices[0].data;
+
+        TB::VertexStream streamPos1 = { TB::VertexSemantic::Position, 1, {}, 3 };
+        streamPos1.data.resize(vertices[0].data.size());
+        std::vector<float>& pos1 = streamPos1.data;
+
+        TB::VertexStream streamPos2 = { TB::VertexSemantic::Position, 2, {}, 3 };
+        streamPos2.data.resize(vertices[0].data.size());
+        std::vector<float>& pos2 = streamPos2.data;
+
+        std::vector<bool> processedVerts;
+        processedVerts.resize(vertices[0].data.size() / 3);
+        processedVerts.assign(processedVerts.size(), false);
+
+        size_t numTris = indices.size() / 3;
+        for (size_t triIndex = 0; triIndex < numTris; triIndex++)
+        {
+            uint32_t i0 = indices[triIndex * 3 + 0];
+            uint32_t i1 = indices[triIndex * 3 + 1];
+            uint32_t i2 = indices[triIndex * 3 + 2];
+
+            TB::runtimeCheck(!processedVerts[i0]);
+            TB::runtimeCheck(!processedVerts[i1]);
+            TB::runtimeCheck(!processedVerts[i2]);
+
+            math::float3 p0(&pos[i0 * 3]);
+            math::float3 p1(&pos[i1 * 3]);
+            math::float3 p2(&pos[i2 * 3]);
+
+            // Set P1 of V0
+            pos1[i0 * 3 + 0] = p1.x;
+            pos1[i0 * 3 + 1] = p1.y;
+            pos1[i0 * 3 + 2] = p1.z;
+            // Set P2 of V0
+            pos2[i0 * 3 + 0] = p2.x;
+            pos2[i0 * 3 + 1] = p2.y;
+            pos2[i0 * 3 + 2] = p2.z;
+
+            // Set P1 of V1
+            pos1[i1 * 3 + 0] = p2.x;
+            pos1[i1 * 3 + 1] = p2.y;
+            pos1[i1 * 3 + 2] = p2.z;
+            // Set P2 of V1
+            pos2[i1 * 3 + 0] = p0.x;
+            pos2[i1 * 3 + 1] = p0.y;
+            pos2[i1 * 3 + 2] = p0.z;
+
+            // Set P1 of V2
+            pos1[i2 * 3 + 0] = p0.x;
+            pos1[i2 * 3 + 1] = p0.y;
+            pos1[i2 * 3 + 2] = p0.z;
+            // Set P2 of V2
+            pos2[i2 * 3 + 0] = p1.x;
+            pos2[i2 * 3 + 1] = p1.y;
+            pos2[i2 * 3 + 2] = p1.z;
+
+            processedVerts[i0] = true;
+            processedVerts[i1] = true;
+            processedVerts[i2] = true;
+        }
+
+        vertices.push_back(streamPos1);
+        vertices.push_back(streamPos2);
+    }
+
+    static void modifierScene(TB::Vertices& vertices, TB::Indices& indices)
+    {
+        modifierTriangleUnique(vertices, indices);
+        modifierTriangleVerts(vertices, indices);
+    }
+
     void init(const std::shared_ptr<TB::DirectXRenderer>& renderer) override
     {
         mRenderer = renderer;
-        mScene = mRenderer->loadScene("Content/Scene.ogex");
+        mScene = mRenderer->loadScene("Content/Scene.ogex", modifierScene);
         mVSBasic = mRenderer->loadShader("Content/BasicEffect.hlsl", "MainVS", TB::ShaderType::Vertex);
         mPSBasic = mRenderer->loadShader("Content/BasicEffect.hlsl", "MainPS", TB::ShaderType::Pixel);
         mVSScreen = mRenderer->loadShader("Content/Screen.hlsl", "MainVS", TB::ShaderType::Vertex);

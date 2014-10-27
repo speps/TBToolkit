@@ -60,6 +60,55 @@ namespace TB
         Always
     };
 
+    enum class FilterMode
+    {
+        MinMagMipPoint,
+        MinMagPointMipLinear,
+        MinPointMagLinearMipPoint,
+        MinPointMagMipLinear,
+        MinLinearMagMipPoint,
+        MinLinearMagPointMipLinear,
+        MinMagLinearMipPoint,
+        MinMagMipLinear,
+        Anisotropic,
+        ComparisonMinMagMipPoint,
+        ComparisonMinMagPointMipLinear,
+        ComparisonMinPointMagLinearMipPoint,
+        ComparisonMinPointMagMipLinear,
+        ComparisonMinLinearMagMipPoint,
+        ComparisonMinLinearMagPointMipLinear,
+        ComparisonMinMagLinearMipPoint,
+        ComparisonMinMagMipLinear,
+        ComparisonAnisotropic,
+        MinimumMinMagMipPoint,
+        MinimumMinMagPointMipLinear,
+        MinimumMinPointMagLinearMipPoint,
+        MinimumMinPointMagMipLinear,
+        MinimumMinLinearMagMipPoint,
+        MinimumMinLinearMagPointMipLinear,
+        MinimumMinMagLinearMipPoint,
+        MinimumMinMagMipLinear,
+        MinimumAnisotropic,
+        MaximumMinMagMipPoint,
+        MaximumMinMagPointMipLinear,
+        MaximumMinPointMagLinearMipPoint,
+        MaximumMinPointMagMipLinear,
+        MaximumMinLinearMagMipPoint,
+        MaximumMinLinearMagPointMipLinear,
+        MaximumMinMagLinearMipPoint,
+        MaximumMinMagMipLinear,
+        MaximumAnisotropic
+    };
+
+    enum class AddressMode
+    {
+        Wrap,
+        Mirror,
+        Clamp,
+        Border,
+        MirrorOnce
+    };
+
     class Renderer
     {
     public:

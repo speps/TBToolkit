@@ -164,7 +164,6 @@ namespace TB
         DirectXInputLayoutRegistry::init(shared_from_this());
 
         mUnitQuad = std::make_shared<DirectXModel>(shared_from_this());
-        Vertices quadVertices;
         mUnitQuad->addMesh({
             { VertexSemantic::Position, 0, { -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, -1.0f, 0.0f, -1.0f, -1.0f, 0.0f }, 3 },
             { VertexSemantic::Normal, 0, { 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f }, 3 },

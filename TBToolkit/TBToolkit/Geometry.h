@@ -20,7 +20,8 @@ namespace TB
     {
         Position,
         Normal,
-        TexCoord
+        TexCoord,
+        Color
     };
 
     struct VertexStream

@@ -17,7 +17,7 @@ namespace TB
 
     DirectXTexture::DirectXTexture(const std::shared_ptr<class DirectXRenderer>& renderer, int32_t width, int32_t height, TextureType type, TextureFlags flags)
     {
-        D3D11_TEXTURE2D_DESC desc = {0};
+        D3D11_TEXTURE2D_DESC desc{};
         desc.Width = width;
         desc.Height = height;
         desc.MipLevels = 1;

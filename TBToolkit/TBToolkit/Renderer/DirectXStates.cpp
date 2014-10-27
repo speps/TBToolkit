@@ -55,6 +55,63 @@ namespace
         }
         return (D3D11_COMPARISON_FUNC)0;
     }
+
+    D3D11_FILTER translate(TB::FilterMode filter)
+    {
+        switch(filter)
+        {
+        case TB::FilterMode::MinMagMipPoint: return D3D11_FILTER_MIN_MAG_MIP_POINT;
+        case TB::FilterMode::MinMagPointMipLinear: return D3D11_FILTER_MIN_MAG_POINT_MIP_LINEAR;
+        case TB::FilterMode::MinPointMagLinearMipPoint: return D3D11_FILTER_MIN_POINT_MAG_LINEAR_MIP_POINT;
+        case TB::FilterMode::MinPointMagMipLinear: return D3D11_FILTER_MIN_POINT_MAG_MIP_LINEAR;
+        case TB::FilterMode::MinLinearMagMipPoint: return D3D11_FILTER_MIN_LINEAR_MAG_MIP_POINT;
+        case TB::FilterMode::MinLinearMagPointMipLinear: return D3D11_FILTER_MIN_LINEAR_MAG_POINT_MIP_LINEAR;
+        case TB::FilterMode::MinMagLinearMipPoint: return D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
+        case TB::FilterMode::MinMagMipLinear: return D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+        case TB::FilterMode::Anisotropic: return D3D11_FILTER_ANISOTROPIC;
+        case TB::FilterMode::ComparisonMinMagMipPoint: return D3D11_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
+        case TB::FilterMode::ComparisonMinMagPointMipLinear: return D3D11_FILTER_COMPARISON_MIN_MAG_POINT_MIP_LINEAR;
+        case TB::FilterMode::ComparisonMinPointMagLinearMipPoint: return D3D11_FILTER_COMPARISON_MIN_POINT_MAG_LINEAR_MIP_POINT;
+        case TB::FilterMode::ComparisonMinPointMagMipLinear: return D3D11_FILTER_COMPARISON_MIN_POINT_MAG_MIP_LINEAR;
+        case TB::FilterMode::ComparisonMinLinearMagMipPoint: return D3D11_FILTER_COMPARISON_MIN_LINEAR_MAG_MIP_POINT;
+        case TB::FilterMode::ComparisonMinLinearMagPointMipLinear: return D3D11_FILTER_COMPARISON_MIN_LINEAR_MAG_POINT_MIP_LINEAR;
+        case TB::FilterMode::ComparisonMinMagLinearMipPoint: return D3D11_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+        case TB::FilterMode::ComparisonMinMagMipLinear: return D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
+        case TB::FilterMode::ComparisonAnisotropic: return D3D11_FILTER_COMPARISON_ANISOTROPIC;
+        case TB::FilterMode::MinimumMinMagMipPoint: return D3D11_FILTER_MINIMUM_MIN_MAG_MIP_POINT;
+        case TB::FilterMode::MinimumMinMagPointMipLinear: return D3D11_FILTER_MINIMUM_MIN_MAG_POINT_MIP_LINEAR;
+        case TB::FilterMode::MinimumMinPointMagLinearMipPoint: return D3D11_FILTER_MINIMUM_MIN_POINT_MAG_LINEAR_MIP_POINT;
+        case TB::FilterMode::MinimumMinPointMagMipLinear: return D3D11_FILTER_MINIMUM_MIN_POINT_MAG_MIP_LINEAR;
+        case TB::FilterMode::MinimumMinLinearMagMipPoint: return D3D11_FILTER_MINIMUM_MIN_LINEAR_MAG_MIP_POINT;
+        case TB::FilterMode::MinimumMinLinearMagPointMipLinear: return D3D11_FILTER_MINIMUM_MIN_LINEAR_MAG_POINT_MIP_LINEAR;
+        case TB::FilterMode::MinimumMinMagLinearMipPoint: return D3D11_FILTER_MINIMUM_MIN_MAG_LINEAR_MIP_POINT;
+        case TB::FilterMode::MinimumMinMagMipLinear: return D3D11_FILTER_MINIMUM_MIN_MAG_MIP_LINEAR;
+        case TB::FilterMode::MinimumAnisotropic: return D3D11_FILTER_MINIMUM_ANISOTROPIC;
+        case TB::FilterMode::MaximumMinMagMipPoint: return D3D11_FILTER_MAXIMUM_MIN_MAG_MIP_POINT;
+        case TB::FilterMode::MaximumMinMagPointMipLinear: return D3D11_FILTER_MAXIMUM_MIN_MAG_POINT_MIP_LINEAR;
+        case TB::FilterMode::MaximumMinPointMagLinearMipPoint: return D3D11_FILTER_MAXIMUM_MIN_POINT_MAG_LINEAR_MIP_POINT;
+        case TB::FilterMode::MaximumMinPointMagMipLinear: return D3D11_FILTER_MAXIMUM_MIN_POINT_MAG_MIP_LINEAR;
+        case TB::FilterMode::MaximumMinLinearMagMipPoint: return D3D11_FILTER_MAXIMUM_MIN_LINEAR_MAG_MIP_POINT;
+        case TB::FilterMode::MaximumMinLinearMagPointMipLinear: return D3D11_FILTER_MAXIMUM_MIN_LINEAR_MAG_POINT_MIP_LINEAR;
+        case TB::FilterMode::MaximumMinMagLinearMipPoint: return D3D11_FILTER_MAXIMUM_MIN_MAG_LINEAR_MIP_POINT;
+        case TB::FilterMode::MaximumMinMagMipLinear: return D3D11_FILTER_MAXIMUM_MIN_MAG_MIP_LINEAR;
+        case TB::FilterMode::MaximumAnisotropic: return D3D11_FILTER_MAXIMUM_ANISOTROPIC;
+        }
+        return (D3D11_FILTER)0;
+    }
+
+    D3D11_TEXTURE_ADDRESS_MODE translate(TB::AddressMode addr)
+    {
+        switch (addr)
+        {
+        case TB::AddressMode::Wrap: return D3D11_TEXTURE_ADDRESS_WRAP;
+        case TB::AddressMode::Mirror: return D3D11_TEXTURE_ADDRESS_MIRROR;
+        case TB::AddressMode::Clamp: return D3D11_TEXTURE_ADDRESS_CLAMP;
+        case TB::AddressMode::Border: return D3D11_TEXTURE_ADDRESS_BORDER;
+        case TB::AddressMode::MirrorOnce: return D3D11_TEXTURE_ADDRESS_MIRROR_ONCE;
+        }
+        return (D3D11_TEXTURE_ADDRESS_MODE)0;
+    }
 }
 
 namespace TB
@@ -75,7 +132,7 @@ namespace TB
         auto value = DirectXStateRegistry::get<DirectXBlendState>(key);
         if (!value.isValid())
         {
-            D3D11_BLEND_DESC desc = {0};
+            D3D11_BLEND_DESC desc{};
             desc.RenderTarget[0].BlendEnable = state.enable;
             desc.RenderTarget[0].BlendOp = translate(state.op);
             desc.RenderTarget[0].SrcBlend = translate(state.srcBlend);
@@ -105,7 +162,7 @@ namespace TB
         auto value = DirectXStateRegistry::get<DirectXDepthStencilState>(key);
         if (!value.isValid())
         {
-            D3D11_DEPTH_STENCIL_DESC desc = {0};
+            D3D11_DEPTH_STENCIL_DESC desc{};
             desc.DepthEnable = state.depthEnable;
             desc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
             desc.DepthFunc = translate(state.depthFunc);
@@ -120,6 +177,41 @@ namespace TB
             DirectXStateRegistry::registerState<DirectXDepthStencilState>(key, value);
         }
         return (ID3D11DepthStencilState*)(ID3D11DeviceChild*)value;
+    }
+
+    const char* TB::TypeTraits<DirectXSamplerState>::Name = "DirectXSamplerState";
+
+    uint32_t DirectXSamplerState::State::key() const
+    {
+        return hash((uint8_t*)this, sizeof(State));
+    }
+
+    ID3D11SamplerState* DirectXSamplerState::getOrCreate(const State& state)
+    {
+        auto key = state.key();
+        auto value = DirectXStateRegistry::get<DirectXSamplerState>(key);
+        if (!value.isValid())
+        {
+            D3D11_SAMPLER_DESC desc{};
+            desc.Filter = translate(state.filter);
+            desc.AddressU = translate(state.addrU);
+            desc.AddressV = translate(state.addrV);
+            desc.AddressW = translate(state.addrW);
+            desc.MinLOD = -FLT_MAX;
+            desc.MaxLOD = FLT_MAX;
+            desc.MipLODBias = 0.0f;
+            desc.MaxAnisotropy = 1;
+            desc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+            desc.BorderColor[0] = 1.0f;
+            desc.BorderColor[1] = 1.0f;
+            desc.BorderColor[2] = 1.0f;
+            desc.BorderColor[3] = 1.0f;
+
+            HRESULT hr = DirectXStateRegistry::getRenderer()->getDevice()->CreateSamplerState(&desc, reinterpret_cast<ID3D11SamplerState**>(value.getInitRef()));
+            TB::runtimeCheck(hr == S_OK);
+            DirectXStateRegistry::registerState<DirectXSamplerState>(key, value);
+        }
+        return (ID3D11SamplerState*)(ID3D11DeviceChild*)value;
     }
 }
 

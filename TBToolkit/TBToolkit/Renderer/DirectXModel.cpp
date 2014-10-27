@@ -135,7 +135,7 @@ namespace TB
     {
         Mesh mesh;
         setupBuffers(mesh, vertices, indices);
-        Part part = {0};
+        Part part{};
         part.indexCount = indices.size();
         mesh.parts.push_back(part);
         mMeshes.push_back(mesh);
@@ -168,12 +168,12 @@ namespace TB
         {
             const auto& stream = vertices[i];
 
-            D3D11_BUFFER_DESC desc = {0};
+            D3D11_BUFFER_DESC desc{};
             desc.Usage = D3D11_USAGE_DEFAULT;
             desc.ByteWidth = UINT(stream.data.size() * sizeof(float));
             desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 
-            D3D11_SUBRESOURCE_DATA initData = {0};
+            D3D11_SUBRESOURCE_DATA initData{};
             initData.pSysMem = &stream.data[0];
 
             HRESULT hr = mRenderer->getDevice()->CreateBuffer(&desc, &initData, mesh.vertexBuffers[i].getInitRef());
@@ -186,12 +186,12 @@ namespace TB
 
         // Index buffer
         {
-            D3D11_BUFFER_DESC desc = {0};
+            D3D11_BUFFER_DESC desc{};
             desc.Usage = D3D11_USAGE_DEFAULT;
             desc.ByteWidth = UINT(sizeof(uint32_t) * indices.size());
             desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 
-            D3D11_SUBRESOURCE_DATA initData = {0};
+            D3D11_SUBRESOURCE_DATA initData{};
             initData.pSysMem = &indices[0];
 
             HRESULT hr = mRenderer->getDevice()->CreateBuffer(&desc, &initData, mesh.indexBuffer.getInitRef());

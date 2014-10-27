@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Content">
+      <UniqueIdentifier>{2b7020bb-a7fb-4390-80e2-d90bde846749}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ToolkitContentTask Include="Content\BasicEffect.hlsl">
+      <Filter>Content</Filter>
+    </ToolkitContentTask>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Content\Screen.hlsl">
+      <Filter>Content</Filter>
+    </FxCompile>
+  </ItemGroup>
+</Project>
