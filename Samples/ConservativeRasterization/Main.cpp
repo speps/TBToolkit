@@ -23,6 +23,7 @@ public:
     DirectXFrame()
         : mTimer(0.0f)
         , mFrameIndex(0)
+        , mDivider(1)
     {
     }
 
@@ -40,7 +41,6 @@ public:
         mPSBasic = mRenderer->loadShader("Content/BasicEffect.hlsl", "MainPS", TB::ShaderType::Pixel);
         mVSScreen = mRenderer->loadShader("Content/Screen.hlsl", "MainVS", TB::ShaderType::Vertex);
         mPSScreen = mRenderer->loadShader("Content/Screen.hlsl", "MainPS", TB::ShaderType::Pixel);
-        mSceneRT = std::make_shared<TB::DirectXTexture>(mRenderer, mRenderer->getWidth() / 4, mRenderer->getHeight() / 4, TB::TextureType::Color, TB::TextureFlags::Target | TB::TextureFlags::ShaderResource);
 
         {
             mEyePosition = DirectX::XMFLOAT3(0.0f, -10.0f, 0.0f);
@@ -81,8 +81,8 @@ public:
 
         // Setup the viewport
         D3D11_VIEWPORT vp;
-        vp.Width = (FLOAT)mRenderer->getWidth() / 4;
-        vp.Height = (FLOAT)mRenderer->getHeight() / 4;
+        vp.Width = (FLOAT)mRenderer->getWidth() / mDivider;
+        vp.Height = (FLOAT)mRenderer->getHeight() / mDivider;
         vp.MinDepth = 0.0f;
         vp.MaxDepth = 1.0f;
         vp.TopLeftX = 0;
@@ -159,6 +159,13 @@ public:
 
     virtual void render() override
     {
+        int width = mRenderer->getWidth() / mDivider;
+        int height = mRenderer->getHeight() / mDivider;
+        if (!mSceneRT || mSceneRT->getWidth() != width || mSceneRT->getHeight() != height)
+        {
+            mSceneRT = std::make_shared<TB::DirectXTexture>(mRenderer, width, height, TB::TextureType::Color, TB::TextureFlags::Target | TB::TextureFlags::ShaderResource);
+        }
+
         //renderNormal();
         renderDebug();
         mFrameIndex++;
@@ -182,6 +189,16 @@ public:
     {
         mTimer += delta;
         mCurrentEyePosition = mEyePosition;
+
+        if (TB::isKeyPressed(TB::Key::PageUp))
+        {
+            mDivider = TB::clamp(mDivider * 2, 1, 16);
+        }
+
+        if (TB::isKeyPressed(TB::Key::PageDown))
+        {
+            mDivider = TB::clamp(mDivider / 2, 1, 16);
+        }
     }
 
 private:
@@ -202,6 +219,8 @@ private:
     DirectX::XMFLOAT3 mEyePosition;
     DirectX::XMFLOAT3 mCurrentEyePosition;
     DirectX::XMFLOAT3 mLookPosition;
+
+    int mDivider;
 };
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)

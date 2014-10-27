@@ -23,11 +23,16 @@ namespace TB
         operator ID3D11DepthStencilView*() const { TB::runtimeCheck(mDSV.isValid()); return mDSV; }
         operator ID3D11ShaderResourceView*() const { TB::runtimeCheck(mSRV.isValid());  return mSRV; }
 
+        size_t getWidth() const { return mWidth; }
+        size_t getHeight() const { return mHeight; }
+
     private:
         ComPtr<ID3D11Resource> mResource;
         ComPtr<ID3D11RenderTargetView> mRTV;
         ComPtr<ID3D11DepthStencilView> mDSV;
         ComPtr<ID3D11ShaderResourceView> mSRV;
+
+        size_t mWidth, mHeight;
     };
 }
 

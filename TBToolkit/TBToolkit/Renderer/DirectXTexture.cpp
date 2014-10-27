@@ -9,6 +9,7 @@
 namespace TB
 {
     DirectXTexture::DirectXTexture(const std::shared_ptr<class DirectXRenderer>& renderer, const std::string& path)
+        : mWidth(0), mHeight(0)
     {
         auto chunk = loadData(path);
         HRESULT hr = DirectX::CreateDDSTextureFromMemory(renderer->getDevice(), chunk.data(), chunk.size(), mResource.getInitRef(), mSRV.getInitRef());
@@ -16,6 +17,7 @@ namespace TB
     }
 
     DirectXTexture::DirectXTexture(const std::shared_ptr<class DirectXRenderer>& renderer, int32_t width, int32_t height, TextureType type, TextureFlags flags)
+        : mWidth(width), mHeight(height)
     {
         D3D11_TEXTURE2D_DESC desc{};
         desc.Width = width;
