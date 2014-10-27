@@ -4,6 +4,7 @@
 #include <TBToolkit/Renderer/DirectXTexture.h>
 #include <TBToolkit/Renderer/DirectXModel.h>
 #include <TBToolkit/Renderer/DirectXConstants.h>
+#include <TBToolkit/Renderer/DirectXStates.h>
 
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
@@ -45,46 +46,6 @@ public:
             mWorldConstants.create(renderer);
             mWorldConstants.update(worldConstants);
         }
-
-        // Rasterizer state
-        {
-            D3D11_RASTERIZER_DESC drd =
-            {
-                D3D11_FILL_SOLID,//D3D11_FILL_MODE FillMode;
-                D3D11_CULL_FRONT,//D3D11_CULL_MODE CullMode;
-                FALSE,//BOOL FrontCounterClockwise;
-                0,//INT DepthBias;
-                0.0,//FLOAT DepthBiasClamp;
-                0.0,//FLOAT SlopeScaledDepthBias;
-                FALSE,//BOOL DepthClipEnable;
-                FALSE,//BOOL ScissorEnable;
-                FALSE,//BOOL MultisampleEnable;
-                FALSE//BOOL AntialiasedLineEnable;
-            };
-
-            HRESULT hr = mRenderer->getDevice()->CreateRasterizerState(&drd, mRSState.getInitRef());
-            TB::runtimeCheck(hr == S_OK);
-        }
-
-        // Sampler state
-        {
-            D3D11_SAMPLER_DESC desc =
-            {
-                D3D11_FILTER_MIN_MAG_MIP_LINEAR,//D3D11_FILTER Filter;
-                D3D11_TEXTURE_ADDRESS_WRAP,//D3D11_TEXTURE_ADDRESS_MODE AddressU;
-                D3D11_TEXTURE_ADDRESS_WRAP,//D3D11_TEXTURE_ADDRESS_MODE AddressV;
-                D3D11_TEXTURE_ADDRESS_WRAP,//D3D11_TEXTURE_ADDRESS_MODE AddressW;
-                0.0f,//FLOAT MipLODBias;
-                0,//UINT MaxAnisotropy;
-                D3D11_COMPARISON_NEVER,//D3D11_COMPARISON_FUNC ComparisonFunc;
-                { 0.0f, 0.0f, 0.0f, 0.0f },//FLOAT BorderColor[ 4 ];
-                0,//FLOAT MinLOD;
-                0,//FLOAT MaxLOD;
-            };
-
-            HRESULT hr = mRenderer->getDevice()->CreateSamplerState(&desc, mSampler.getInitRef());
-            TB::runtimeCheck(hr == S_OK);
-        }
     }
 
     virtual void render() override
@@ -96,9 +57,9 @@ public:
 
         ID3D11Buffer* constants[] = { mViewConstants, mWorldConstants };
         ID3D11ShaderResourceView* srvs[] =  { *tex };
-        ID3D11SamplerState* samplers[] = { mSampler };
+        ID3D11SamplerState* samplers[] = { TB::DirectXSamplerState::get() };
 
-        imc->RSSetState(mRSState);
+        imc->RSSetState(TB::DirectXRasterizerState::get());
         imc->VSSetConstantBuffers(0, 2, constants);
         imc->VSSetShader(*vs, nullptr, 0);
         imc->PSSetConstantBuffers(0, 2, constants);
@@ -140,11 +101,9 @@ private:
     std::shared_ptr<TB::Shader> mVertexShader;
     std::shared_ptr<TB::Shader> mPixelShader;
     std::shared_ptr<TB::Texture> mTexture;
-    TB::ComPtr<ID3D11SamplerState> mSampler;
 
     TB::DirectXConstants<TB::DirectXViewConstants> mViewConstants;
     TB::DirectXConstants<TB::DirectXWorldConstants> mWorldConstants;
-    TB::ComPtr<ID3D11RasterizerState> mRSState;
 
     float mTimer;
     DirectX::XMFLOAT3 mEyePosition;

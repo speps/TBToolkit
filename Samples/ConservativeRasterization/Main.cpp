@@ -45,7 +45,6 @@ public:
         {
             mEyePosition = DirectX::XMFLOAT3(0.0f, -10.0f, 0.0f);
             mLookPosition = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
-
             mViewConstants.create(renderer);
         }
 
@@ -61,26 +60,6 @@ public:
             mScreenConstants.create(renderer);
             mScreenConstants.update(screen);
         }
-
-        // Rasterizer state
-        {
-            D3D11_RASTERIZER_DESC drd =
-            {
-                D3D11_FILL_SOLID,//D3D11_FILL_MODE FillMode;
-                D3D11_CULL_FRONT,//D3D11_CULL_MODE CullMode;
-                FALSE,//BOOL FrontCounterClockwise;
-                0,//INT DepthBias;
-                0.0,//FLOAT DepthBiasClamp;
-                0.0,//FLOAT SlopeScaledDepthBias;
-                FALSE,//BOOL DepthClipEnable;
-                FALSE,//BOOL ScissorEnable;
-                FALSE,//BOOL MultisampleEnable;
-                FALSE//BOOL AntialiasedLineEnable;
-            };
-
-            HRESULT hr = mRenderer->getDevice()->CreateRasterizerState(&drd, mRSState.getInitRef());
-            TB::runtimeCheck(hr == S_OK);
-        }
     }
 
     void renderScenePass(ID3D11RenderTargetView* target, const math::float2& offset)
@@ -94,7 +73,7 @@ public:
 
         imc->OMSetBlendState(TB::DirectXBlendState::get(), nullptr, 0xffffffff);
         imc->OMSetDepthStencilState(TB::DirectXDepthStencilState::get(), 0);
-        imc->RSSetState(mRSState);
+        imc->RSSetState(TB::DirectXRasterizerState::get());
         imc->VSSetConstantBuffers(0, 2, constants);
         imc->VSSetShader(*vs, nullptr, 0);
         imc->PSSetConstantBuffers(0, 2, constants);
@@ -145,7 +124,7 @@ public:
             mRenderer->clear(mRenderer->getBackBufferRTV(), math::float4::zero);
             mRenderer->clear(mRenderer->getBackBufferDSV());
 
-            imc->RSSetState(mRSState);
+            imc->RSSetState(TB::DirectXRasterizerState::get());
             imc->VSSetConstantBuffers(0, 0, nullptr);
             imc->VSSetShader(*vs, nullptr, 0);
             imc->PSSetConstantBuffers(0, 1, constants);
@@ -203,7 +182,6 @@ public:
     {
         mTimer += delta;
         mCurrentEyePosition = mEyePosition;
-        //mCurrentEyePosition.x += math::Sin(mTimer);
     }
 
 private:
@@ -218,7 +196,6 @@ private:
     TB::DirectXConstants<TB::DirectXViewConstants> mViewConstants;
     TB::DirectXConstants<TB::DirectXObjectConstants> mObjectConstants;
     TB::DirectXConstants<ScreenConstants> mScreenConstants;
-    TB::ComPtr<ID3D11RasterizerState> mRSState;
 
     float mTimer;
     uint64_t mFrameIndex;

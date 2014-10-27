@@ -1,5 +1,4 @@
 #pragma once
-
 #include <vector>
 #include <memory>
 
@@ -101,6 +100,14 @@ namespace TB
     DataChunk loadData(const std::string& path);
 
     double getElapsedTime();
+
+    enum class Key;
+    bool isKeyPressed(const Key& key);
+    bool isKeyReleased(const Key& key);
+
+    enum class Mouse;
+    bool isMousePressed(const Mouse& button);
+    bool isMouseReleased(const Mouse& button);
 }
 
 #ifdef _WIN32

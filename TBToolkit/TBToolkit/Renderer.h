@@ -109,6 +109,19 @@ namespace TB
         MirrorOnce
     };
 
+    enum class FillMode
+    {
+        Wireframe,
+        Solid
+    };
+
+    enum class CullMode
+    {
+        None,
+        Front,
+        Back
+    };
+
     class Renderer
     {
     public:

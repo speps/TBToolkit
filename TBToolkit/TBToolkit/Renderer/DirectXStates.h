@@ -11,6 +11,7 @@ struct ID3D11DeviceChild;
 struct ID3D11BlendState;
 struct ID3D11DepthStencilState;
 struct ID3D11SamplerState;
+struct ID3D11RasterizerState;
 
 namespace TB
 {
@@ -149,6 +150,33 @@ namespace TB
 
     template<>
     struct TypeTraits<DirectXSamplerState>
+    {
+        static const char* Name;
+    };
+
+    class DirectXRasterizerState
+    {
+    private:
+        struct State
+        {
+            FillMode fill;
+            CullMode cull;
+
+            uint32_t key() const;
+        };
+
+        static ID3D11RasterizerState* getOrCreate(const State& state);
+
+    public:
+        template<CullMode cull = CullMode::Front, FillMode fill = FillMode::Solid>
+        static ID3D11RasterizerState* get()
+        {
+            return getOrCreate({ fill, cull });
+        }
+    };
+
+    template<>
+    struct TypeTraits<DirectXRasterizerState>
     {
         static const char* Name;
     };

@@ -112,6 +112,27 @@ namespace
         }
         return (D3D11_TEXTURE_ADDRESS_MODE)0;
     }
+
+    D3D11_FILL_MODE translate(TB::FillMode fill)
+    {
+        switch (fill)
+        {
+        case TB::FillMode::Wireframe: return D3D11_FILL_WIREFRAME;
+        case TB::FillMode::Solid: return D3D11_FILL_SOLID;
+        }
+        return (D3D11_FILL_MODE)0;
+    }
+
+    D3D11_CULL_MODE translate(TB::CullMode cull)
+    {
+        switch (cull)
+        {
+        case TB::CullMode::None: return D3D11_CULL_NONE;
+        case TB::CullMode::Front: return D3D11_CULL_FRONT;
+        case TB::CullMode::Back: return D3D11_CULL_BACK;
+        }
+        return (D3D11_CULL_MODE)0;
+    }
 }
 
 namespace TB
@@ -212,6 +233,38 @@ namespace TB
             DirectXStateRegistry::registerState<DirectXSamplerState>(key, value);
         }
         return (ID3D11SamplerState*)(ID3D11DeviceChild*)value;
+    }
+
+    const char* TB::TypeTraits<DirectXRasterizerState>::Name = "DirectXRasterizerState";
+
+    uint32_t DirectXRasterizerState::State::key() const
+    {
+        return hash((uint8_t*)this, sizeof(State));
+    }
+
+    ID3D11RasterizerState* DirectXRasterizerState::getOrCreate(const State& state)
+    {
+        auto key = state.key();
+        auto value = DirectXStateRegistry::get<DirectXRasterizerState>(key);
+        if (!value.isValid())
+        {
+            D3D11_RASTERIZER_DESC desc{};
+            desc.FillMode = translate(state.fill);
+            desc.CullMode = translate(state.cull);
+            desc.FrontCounterClockwise = FALSE;
+            desc.DepthBias = 0;
+            desc.SlopeScaledDepthBias = 0.0f;
+            desc.DepthBiasClamp = 0.0f;
+            desc.DepthClipEnable = TRUE;
+            desc.ScissorEnable = FALSE;
+            desc.MultisampleEnable = FALSE;
+            desc.AntialiasedLineEnable = FALSE;
+
+            HRESULT hr = DirectXStateRegistry::getRenderer()->getDevice()->CreateRasterizerState(&desc, reinterpret_cast<ID3D11RasterizerState**>(value.getInitRef()));
+            TB::runtimeCheck(hr == S_OK);
+            DirectXStateRegistry::registerState<DirectXRasterizerState>(key, value);
+        }
+        return (ID3D11RasterizerState*)(ID3D11DeviceChild*)value;
     }
 }
 

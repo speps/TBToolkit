@@ -12,10 +12,8 @@
     <ToolkitContentTask Include="Content\BasicEffect.hlsl">
       <Filter>Content</Filter>
     </ToolkitContentTask>
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="Content\Screen.hlsl">
+    <ToolkitContentTask Include="Content\Screen.hlsl">
       <Filter>Content</Filter>
-    </FxCompile>
+    </ToolkitContentTask>
   </ItemGroup>
 </Project>

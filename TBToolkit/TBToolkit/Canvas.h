@@ -1,5 +1,4 @@
 #pragma once
-
 #include <TBToolkit/Platform.h>
 
 #include <memory>

@@ -205,46 +205,6 @@ public:
             mScreenConstants.create(renderer);
             mScreenConstants.update(screen);
         }
-
-        // Rasterizer state
-        {
-            D3D11_RASTERIZER_DESC drd =
-            {
-                D3D11_FILL_SOLID,//D3D11_FILL_MODE FillMode;
-                D3D11_CULL_FRONT,//D3D11_CULL_MODE CullMode;
-                FALSE,//BOOL FrontCounterClockwise;
-                0,//INT DepthBias;
-                0.0,//FLOAT DepthBiasClamp;
-                0.0,//FLOAT SlopeScaledDepthBias;
-                FALSE,//BOOL DepthClipEnable;
-                FALSE,//BOOL ScissorEnable;
-                FALSE,//BOOL MultisampleEnable;
-                FALSE//BOOL AntialiasedLineEnable;
-            };
-
-            HRESULT hr = mRenderer->getDevice()->CreateRasterizerState(&drd, mRSState.getInitRef());
-            TB::runtimeCheck(hr == S_OK);
-        }
-
-        // Sampler state
-        {
-            D3D11_SAMPLER_DESC desc =
-            {
-                D3D11_FILTER_MIN_MAG_MIP_LINEAR,//D3D11_FILTER Filter;
-                D3D11_TEXTURE_ADDRESS_WRAP,//D3D11_TEXTURE_ADDRESS_MODE AddressU;
-                D3D11_TEXTURE_ADDRESS_WRAP,//D3D11_TEXTURE_ADDRESS_MODE AddressV;
-                D3D11_TEXTURE_ADDRESS_WRAP,//D3D11_TEXTURE_ADDRESS_MODE AddressW;
-                0.0f,//FLOAT MipLODBias;
-                0,//UINT MaxAnisotropy;
-                D3D11_COMPARISON_NEVER,//D3D11_COMPARISON_FUNC ComparisonFunc;
-                { 0.0f, 0.0f, 0.0f, 0.0f },//FLOAT BorderColor[ 4 ];
-                0,//FLOAT MinLOD;
-                0,//FLOAT MaxLOD;
-            };
-
-            HRESULT hr = mRenderer->getDevice()->CreateSamplerState(&desc, mSampler.getInitRef());
-            TB::runtimeCheck(hr == S_OK);
-        }
     }
 
     void renderQuincunxSSAA()
@@ -259,9 +219,9 @@ public:
 
             ID3D11Buffer* constants[] = { mViewConstants, mWorldConstants };
             ID3D11ShaderResourceView* srvs[] =  { *tex };
-            ID3D11SamplerState* samplers[] = { mSampler };
+            ID3D11SamplerState* samplers[] = { TB::DirectXSamplerState::get() };
 
-            imc->RSSetState(mRSState);
+            imc->RSSetState(TB::DirectXRasterizerState::get());
             imc->VSSetConstantBuffers(0, 2, constants);
             imc->VSSetShader(*vs, nullptr, 0);
             imc->PSSetConstantBuffers(0, 2, constants);
@@ -310,9 +270,9 @@ public:
 
             ID3D11Buffer* constants[] = { mSSAAConstants };
             ID3D11ShaderResourceView* srvs[] =  { *mSceneRT, *mOffsetRT };
-            ID3D11SamplerState* samplers[] = { mSampler };
+            ID3D11SamplerState* samplers[] = { TB::DirectXSamplerState::get() };
 
-            imc->RSSetState(mRSState);
+            imc->RSSetState(TB::DirectXRasterizerState::get());
             imc->VSSetConstantBuffers(0, 0, nullptr);
             imc->VSSetShader(*vs, nullptr, 0);
             imc->PSSetConstantBuffers(0, 1, constants);
@@ -338,11 +298,11 @@ public:
 
         ID3D11Buffer* constants[] = { mViewConstants, mWorldConstants };
         ID3D11ShaderResourceView* srvs[] =  { *tex };
-        ID3D11SamplerState* samplers[] = { mSampler };
+        ID3D11SamplerState* samplers[] = { TB::DirectXSamplerState::get() };
 
         imc->OMSetBlendState(TB::DirectXBlendState::get(), nullptr, 0xffffffff);
         imc->OMSetDepthStencilState(TB::DirectXDepthStencilState::get(), 0);
-        imc->RSSetState(mRSState);
+        imc->RSSetState(TB::DirectXRasterizerState::get());
         imc->VSSetConstantBuffers(0, 2, constants);
         imc->VSSetShader(*vs, nullptr, 0);
         imc->PSSetConstantBuffers(0, 2, constants);
@@ -383,7 +343,7 @@ public:
             ID3D11RenderTargetView* rtvs[] = { mRenderer->getBackBufferRTV() };
             ID3D11Buffer* constants[] = { mScreenConstants };
             ID3D11ShaderResourceView* srvs[] =  { *mSceneRT };
-            ID3D11SamplerState* samplers[] = { mSampler };
+            ID3D11SamplerState* samplers[] = { TB::DirectXSamplerState::get() };
 
             auto vs = std::dynamic_pointer_cast<TB::DirectXShader>(mVSScreen);
             auto ps = std::dynamic_pointer_cast<TB::DirectXShader>(mPSScreen);
@@ -400,7 +360,7 @@ public:
                     mRenderer->clear(mRenderer->getBackBufferDSV());
                 }
 
-                imc->RSSetState(mRSState);
+                imc->RSSetState(TB::DirectXRasterizerState::get());
                 imc->VSSetConstantBuffers(0, 0, nullptr);
                 imc->VSSetShader(*vs, nullptr, 0);
                 imc->PSSetConstantBuffers(0, 1, constants);
@@ -439,7 +399,7 @@ public:
             ID3D11RenderTargetView* rtvs[] = { mRenderer->getBackBufferRTV() };
             ID3D11Buffer* constants[] = { mScreenConstants };
             ID3D11ShaderResourceView* srvs[] =  { *mSceneRT };
-            ID3D11SamplerState* samplers[] = { mSampler };
+            ID3D11SamplerState* samplers[] = { TB::DirectXSamplerState::get() };
 
             auto vs = std::dynamic_pointer_cast<TB::DirectXShader>(mVSScreen);
             auto ps = std::dynamic_pointer_cast<TB::DirectXShader>(mPSScreen);
@@ -456,7 +416,7 @@ public:
                     mRenderer->clear(mRenderer->getBackBufferDSV());
                 }
 
-                imc->RSSetState(mRSState);
+                imc->RSSetState(TB::DirectXRasterizerState::get());
                 imc->VSSetConstantBuffers(0, 0, nullptr);
                 imc->VSSetShader(*vs, nullptr, 0);
                 imc->PSSetConstantBuffers(0, 1, constants);
@@ -486,7 +446,7 @@ public:
             ID3D11RenderTargetView* rtvs[] = { mRenderer->getBackBufferRTV() };
             ID3D11Buffer* constants[] = { mScreenConstants };
             ID3D11ShaderResourceView* srvs[] =  { *mSceneRT };
-            ID3D11SamplerState* samplers[] = { mSampler };
+            ID3D11SamplerState* samplers[] = { TB::DirectXSamplerState::get() };
 
             auto vs = std::dynamic_pointer_cast<TB::DirectXShader>(mVSFXAA);
             auto ps = std::dynamic_pointer_cast<TB::DirectXShader>(mPSFXAA);
@@ -495,7 +455,7 @@ public:
             mRenderer->clear(mRenderer->getBackBufferRTV(), math::float4::zero);
             mRenderer->clear(mRenderer->getBackBufferDSV());
 
-            imc->RSSetState(mRSState);
+            imc->RSSetState(TB::DirectXRasterizerState::get());
             imc->VSSetConstantBuffers(0, 0, nullptr);
             imc->VSSetShader(*vs, nullptr, 0);
             imc->PSSetConstantBuffers(0, 1, constants);
@@ -561,7 +521,6 @@ private:
     std::shared_ptr<TB::Shader> mVSFXAA;
     std::shared_ptr<TB::Shader> mPSFXAA;
     std::shared_ptr<TB::Texture> mTexture;
-    TB::ComPtr<ID3D11SamplerState> mSampler;
     std::shared_ptr<TB::DirectXTexture> mSceneRT;
     std::shared_ptr<TB::DirectXTexture> mOffsetRT;
 
@@ -569,7 +528,6 @@ private:
     TB::DirectXConstants<TB::DirectXWorldConstants> mWorldConstants;
     TB::DirectXConstants<SSAAConstants> mSSAAConstants;
     TB::DirectXConstants<ScreenConstants> mScreenConstants;
-    TB::ComPtr<ID3D11RasterizerState> mRSState;
 
     float mTimer;
     uint64_t mFrameIndex;
