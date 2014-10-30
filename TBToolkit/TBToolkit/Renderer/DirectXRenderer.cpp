@@ -166,7 +166,6 @@ namespace TB
         mUnitQuad = std::make_shared<DirectXModel>(shared_from_this());
         mUnitQuad->addMesh({
             { VertexSemantic::Position, 0, { -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, -1.0f, 0.0f, -1.0f, -1.0f, 0.0f }, 3 },
-            { VertexSemantic::Normal, 0, { 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f }, 3 },
             { VertexSemantic::TexCoord, 0, { 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f }, 2 }
         }, { 0, 3, 1, 1, 3, 2});
 

@@ -30,6 +30,16 @@
       <FileType>Document</FileType>
     </ToolkitContentTask>
   </ItemGroup>
+  <ItemGroup>
+    <ToolkitContentTask Include="Content\ConservativeEffect.hlsl">
+      <FileType>Document</FileType>
+    </ToolkitContentTask>
+  </ItemGroup>
+  <ItemGroup>
+    <ToolkitContentTask Include="Content\ScreenColorOnly.hlsl">
+      <FileType>Document</FileType>
+    </ToolkitContentTask>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{11E3BFA3-B5A7-4AA9-ABAF-A66897D9C808}</ProjectGuid>
     <RootNamespace>ConservativeRasterization</RootNamespace>

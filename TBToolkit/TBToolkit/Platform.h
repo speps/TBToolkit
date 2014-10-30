@@ -102,10 +102,14 @@ namespace TB
     double getElapsedTime();
 
     enum class Key;
+    bool isKeyDown(const Key& key);
+    bool isKeyUp(const Key& key);
     bool isKeyPressed(const Key& key);
     bool isKeyReleased(const Key& key);
 
     enum class Mouse;
+    bool isMouseDown(const Mouse& button);
+    bool isMouseUp(const Mouse& button);
     bool isMousePressed(const Mouse& button);
     bool isMouseReleased(const Mouse& button);
 }

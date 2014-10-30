@@ -278,6 +278,22 @@ namespace TB
         return (double)counter.QuadPart / freq.QuadPart;
     }
 
+    bool isKeyDown(const Key& key)
+    {
+        bool previousState = false;
+        bool currentState = false;
+        getKeyState(key, previousState, currentState);
+        return currentState;
+    }
+
+    bool isKeyUp(const Key& key)
+    {
+        bool previousState = false;
+        bool currentState = false;
+        getKeyState(key, previousState, currentState);
+        return !currentState;
+    }
+
     bool isKeyPressed(const Key& key)
     {
         bool previousState = false;
@@ -292,6 +308,22 @@ namespace TB
         bool currentState = false;
         getKeyState(key, previousState, currentState);
         return !currentState && previousState;
+    }
+
+    bool isMouseDown(const Mouse& button)
+    {
+        bool currentState = false;
+        bool previousState = false;
+        getMouseState(button, previousState, currentState);
+        return currentState;
+    }
+
+    bool isMouseUp(const Mouse& button)
+    {
+        bool currentState = false;
+        bool previousState = false;
+        getMouseState(button, previousState, currentState);
+        return !currentState;
     }
 
     bool isMousePressed(const Mouse& button)

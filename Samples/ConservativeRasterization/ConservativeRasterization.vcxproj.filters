@@ -15,5 +15,11 @@
     <ToolkitContentTask Include="Content\Screen.hlsl">
       <Filter>Content</Filter>
     </ToolkitContentTask>
+    <ToolkitContentTask Include="Content\ConservativeEffect.hlsl">
+      <Filter>Content</Filter>
+    </ToolkitContentTask>
+    <ToolkitContentTask Include="Content\ScreenColorOnly.hlsl">
+      <Filter>Content</Filter>
+    </ToolkitContentTask>
   </ItemGroup>
 </Project>

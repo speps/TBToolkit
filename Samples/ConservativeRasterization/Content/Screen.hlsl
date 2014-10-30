@@ -2,15 +2,13 @@
 struct VSOutput
 {
     float4 position : SV_POSITION;
-    float3 normal : NORMAL;
     float2 uv : TEXCOORD0;
 };
 
-VSOutput MainVS(float4 pos : POSITION, float3 normal : NORMAL, float2 uv : TEXCOORD0)
+VSOutput MainVS(float3 pos : POSITION, float2 uv : TEXCOORD0)
 {
     VSOutput vs = (VSOutput)0;
-    vs.position = pos;
-    vs.normal = normal;
+    vs.position = float4(pos, 1);
     vs.uv = uv;
     return vs;
 }
