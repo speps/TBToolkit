@@ -18,16 +18,18 @@ cbuffer TempBuffer : register(b2)
 struct VSOutput
 {
     float4 position : SV_POSITION;
+    float4 color : COLOR0;
 };
 
 VSOutput MainVS(float3 pos : POSITION)
 {
     VSOutput vs = (VSOutput)0;
     vs.position = mul(mul(mul(float4(pos, 1), localToWorld), worldToView), viewToClip);
+    vs.color = meshColor;
     return vs;
 }
 
 float4 MainPS(in VSOutput vs) : SV_TARGET0
 {
-    return meshColor;
+    return vs.color;
 }

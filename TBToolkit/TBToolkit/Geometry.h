@@ -36,7 +36,13 @@ namespace TB
     typedef std::vector<uint32_t> Indices;
     typedef std::function<void(Vertices& vertices, Indices& indices)> MeshModifierCallback;
 
-    class Model
+    class Renderable
+    {
+    public:
+        virtual void render() const = 0;
+    };
+
+    class Model : public Renderable
     {
     public:
         Model() {}
@@ -62,13 +68,13 @@ namespace TB
         virtual void render(const std::shared_ptr<class Model>& model) const = 0;
     };
 
-    class Scene
+    class Scene : public Renderable
     {
     public:
         Scene(const std::shared_ptr<class Renderer>& renderer, const OGEX::OpenGexDataDescription& dataDesc, const MeshModifierCallback& meshModifier);
         virtual ~Scene() {}
 
-        void render() const;
+        virtual void render() const override;
 
         std::shared_ptr<Node> getNode(const std::string& name) const;
 

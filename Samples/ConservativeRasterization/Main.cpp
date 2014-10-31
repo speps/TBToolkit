@@ -37,10 +37,65 @@ public:
     DirectXFrame()
         : mTimer(0.0f)
         , mFrameIndex(0)
-        , mDivider(32)
+        , mDivider(1)
         , mOffset(math::float2::zero)
+        , mModelIndex(1)
         , mUpdateGrid(true)
+        , mShowDebugConservative(true)
+        , mShowDebugWire(true)
     {
+    }
+
+    static void modifierTriangleUnique(TB::Vertices& vertices, TB::Indices& indices)
+    {
+        TB::Indices triNew;
+        triNew.reserve(indices.size());
+
+        TB::Vertices vertsNew;
+        vertsNew.reserve(vertices.size());
+
+        size_t numTris = indices.size() / 3;
+        for (size_t sIndex = 0; sIndex < vertices.size(); sIndex++)
+        {
+            TB::VertexStream s = vertices[sIndex];
+
+            std::vector<float> dataNew;
+            dataNew.reserve(indices.size());
+
+            for (size_t triIndex = 0; triIndex < numTris; triIndex++)
+            {
+                uint32_t i0 = indices[triIndex * 3 + 0];
+                uint32_t i1 = indices[triIndex * 3 + 1];
+                uint32_t i2 = indices[triIndex * 3 + 2];
+
+                for (size_t vIndex = 0; vIndex < s.elements; vIndex++)
+                {
+                    dataNew.push_back(s.data[i0 * s.elements + vIndex]);
+                }
+                for (size_t vIndex = 0; vIndex < s.elements; vIndex++)
+                {
+                    dataNew.push_back(s.data[i1 * s.elements + vIndex]);
+                }
+                for (size_t vIndex = 0; vIndex < s.elements; vIndex++)
+                {
+                    dataNew.push_back(s.data[i2 * s.elements + vIndex]);
+                }
+            }
+
+            TB::VertexStream sNew = s;
+            sNew.data = dataNew;
+            vertsNew.push_back(sNew);
+        }
+
+        for (size_t triIndex = 0; triIndex < numTris; triIndex++)
+        {
+            triNew.push_back(uint32_t(triIndex * 3 + 0));
+            triNew.push_back(uint32_t(triIndex * 3 + 1));
+            triNew.push_back(uint32_t(triIndex * 3 + 2));
+        }
+
+        vertices = vertsNew;
+        indices = triNew;
     }
 
     static void modifierTriangleVerts(TB::Vertices& vertices, TB::Indices& indices)
@@ -110,17 +165,30 @@ public:
         vertices.push_back(streamPos2);
     }
 
+    static void modifierScene(TB::Vertices& vertices, TB::Indices& indices)
+    {
+        vertices.pop_back();
+        vertices.pop_back();
+        modifierTriangleUnique(vertices, indices);
+        modifierTriangleVerts(vertices, indices);
+    }
+
     void init(const std::shared_ptr<TB::DirectXRenderer>& renderer) override
     {
         mRenderer = renderer;
 
-        mModel = std::make_shared<TB::DirectXModel>(mRenderer);
+        auto triModel = std::make_shared<TB::DirectXModel>(mRenderer);
         TB::Vertices v = {
             { TB::VertexSemantic::Position, 0, { -0.7f, 0.0f, -0.42f, 0.57f, 0.0f, -0.45f, 0.8f, 0.0f, 0.2f }, 3 }
         };
         TB::Indices i = { 0, 1, 2 };
         modifierTriangleVerts(v, i);
-        mModel->addMesh(v, i);
+        triModel->addMesh(v, i);
+
+        mModels.push_back(triModel);
+
+        auto grassModel = mRenderer->loadScene("Content/GrassScene.ogex", modifierScene);
+        mModels.push_back(grassModel);
 
         mVSBasic = mRenderer->loadShader("Content/BasicEffect.hlsl", "MainVS", TB::ShaderType::Vertex);
         mPSBasic = mRenderer->loadShader("Content/BasicEffect.hlsl", "MainPS", TB::ShaderType::Pixel);
@@ -132,7 +200,7 @@ public:
         mPSScreenColorOnly = mRenderer->loadShader("Content/ScreenColorOnly.hlsl", "MainPS", TB::ShaderType::Pixel);
 
         {
-            mEyePosition = DirectX::XMFLOAT3(0.0f, -10.0f, 0.0f);
+            mEyePosition = DirectX::XMFLOAT3(0.0f, -4.0f, 0.0f);
             mLookPosition = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
             mViewConstants.create(renderer);
         }
@@ -195,8 +263,16 @@ public:
             mTempConstants.update(temp);
             imc->RSSetState(TB::DirectXRasterizerState::get<TB::CullMode::None>());
 
-            vs = std::dynamic_pointer_cast<TB::DirectXShader>(mVSConservative);
-            ps = std::dynamic_pointer_cast<TB::DirectXShader>(mPSConservative);
+            if (mShowDebugConservative)
+            {
+                vs = std::dynamic_pointer_cast<TB::DirectXShader>(mVSConservative);
+                ps = std::dynamic_pointer_cast<TB::DirectXShader>(mPSConservative);
+            }
+            else
+            {
+                vs = std::dynamic_pointer_cast<TB::DirectXShader>(mVSBasic);
+                ps = std::dynamic_pointer_cast<TB::DirectXShader>(mPSBasic);
+            }
         }
 
         imc->OMSetBlendState(TB::DirectXBlendState::get(), nullptr, 0xffffffff);
@@ -216,7 +292,7 @@ public:
             }
 
             updateViewConstants(mCurrentEyePosition, mLookPosition, offset.x, offset.y);
-            mModel->render();
+            mModels[mModelIndex]->render();
 
             imc->OMSetRenderTargets(0, nullptr, nullptr);
         }
@@ -259,7 +335,7 @@ public:
             mRenderer->clear(mRenderer->getBackBufferDSV());
 
             imc->RSSetState(TB::DirectXRasterizerState::get());
-            imc->VSSetConstantBuffers(0, 0, nullptr);
+            imc->VSSetConstantBuffers(0, 1, constants);
             imc->VSSetShader(*vs, nullptr, 0);
             imc->PSSetConstantBuffers(0, 1, constants);
             imc->PSSetShader(*ps, nullptr, 0);
@@ -293,7 +369,7 @@ public:
             auto ps = std::dynamic_pointer_cast<TB::DirectXShader>(mPSScreenColorOnly);
 
             imc->RSSetState(TB::DirectXRasterizerState::get());
-            imc->VSSetConstantBuffers(0, 0, nullptr);
+            imc->VSSetConstantBuffers(0, 1, constants);
             imc->VSSetShader(*vs, nullptr, 0);
             imc->PSSetConstantBuffers(0, 1, constants);
             imc->PSSetShader(*ps, nullptr, 0);
@@ -311,8 +387,11 @@ public:
         }
         mRenderer->endEvent();
 
-        renderScenePass(mRenderer->getBackBufferRTV(), math::float2::zero, DebugMode::Wire);
-        renderScenePass(mRenderer->getBackBufferRTV(), math::float2::zero, DebugMode::Output);
+        if (mShowDebugWire)
+        {
+            renderScenePass(mRenderer->getBackBufferRTV(), math::float2::zero, DebugMode::Wire);
+            renderScenePass(mRenderer->getBackBufferRTV(), math::float2::zero, DebugMode::Output);
+        }
     }
 
     void renderNormal()
@@ -362,34 +441,37 @@ public:
         };
         TB::Indices i;
 
-        int iWidth = mRenderer->getWidth() / mDivider;
-        for (int x = 1; x < iWidth; x++)
+        if (mDivider > 4)
         {
-            float fx = (x - iWidth / 2.0f) / (iWidth / 2.0f);
-            uint32_t n = (uint32_t)v[0].data.size() / 3;
-            v[0].data.push_back(fx);
-            v[0].data.push_back(-1.0f);
-            v[0].data.push_back(0.0f);
-            v[0].data.push_back(fx);
-            v[0].data.push_back(1.0f);
-            v[0].data.push_back(0.0f);
-            i.push_back(n);
-            i.push_back(n + 1);
-        }
+            int iWidth = mRenderer->getWidth() / mDivider;
+            for (int x = 1; x < iWidth; x++)
+            {
+                float fx = (x - iWidth / 2.0f) / (iWidth / 2.0f);
+                uint32_t n = (uint32_t)v[0].data.size() / 3;
+                v[0].data.push_back(fx);
+                v[0].data.push_back(-1.0f);
+                v[0].data.push_back(0.0f);
+                v[0].data.push_back(fx);
+                v[0].data.push_back(1.0f);
+                v[0].data.push_back(0.0f);
+                i.push_back(n);
+                i.push_back(n + 1);
+            }
 
-        int iHeight = mRenderer->getHeight() / mDivider;
-        for (int y = 1; y < iHeight; y++)
-        {
-            float fy = (y - iHeight / 2.0f) / (iHeight / 2.0f);
-            uint32_t n = (uint32_t)v[0].data.size() / 3;
-            v[0].data.push_back(-1.0f);
-            v[0].data.push_back(fy);
-            v[0].data.push_back(0.0f);
-            v[0].data.push_back(1.0f);
-            v[0].data.push_back(fy);
-            v[0].data.push_back(0.0f);
-            i.push_back(n);
-            i.push_back(n + 1);
+            int iHeight = mRenderer->getHeight() / mDivider;
+            for (int y = 1; y < iHeight; y++)
+            {
+                float fy = (y - iHeight / 2.0f) / (iHeight / 2.0f);
+                uint32_t n = (uint32_t)v[0].data.size() / 3;
+                v[0].data.push_back(-1.0f);
+                v[0].data.push_back(fy);
+                v[0].data.push_back(0.0f);
+                v[0].data.push_back(1.0f);
+                v[0].data.push_back(fy);
+                v[0].data.push_back(0.0f);
+                i.push_back(n);
+                i.push_back(n + 1);
+            }
         }
 
         mGridModel->addMesh(v, i);
@@ -410,9 +492,9 @@ public:
 
         float s = math::Sin(mTimer);
         float c = math::Cos(mTimer);
-        mCurrentEyePosition.x = s * -10.0f;
-        mCurrentEyePosition.y = c * -10.0f;
-        mCurrentEyePosition.z = 0.0f;
+        mCurrentEyePosition.x = s * -1.0f;
+        mCurrentEyePosition.y = c * -1.0f;
+        mCurrentEyePosition.z = 1.0f;
 
         if (TB::isKeyPressed(TB::Key::PageDown))
         {
@@ -441,11 +523,19 @@ public:
         {
             mOffset.y -= 1.0f;
         }
+
+        if (TB::isKeyPressed(TB::Key::C))
+        {
+            mShowDebugConservative = !mShowDebugConservative;
+        }
+        if (TB::isKeyPressed(TB::Key::W))
+        {
+            mShowDebugWire = !mShowDebugWire;
+        }
     }
 
 private:
     std::shared_ptr<TB::DirectXRenderer> mRenderer;
-    std::shared_ptr<TB::Model> mModel;
     std::shared_ptr<TB::Model> mGridModel;
     std::shared_ptr<TB::Shader> mVSBasic;
     std::shared_ptr<TB::Shader> mPSBasic;
@@ -457,7 +547,12 @@ private:
     std::shared_ptr<TB::Shader> mPSScreenColorOnly;
     std::shared_ptr<TB::DirectXTexture> mSceneRT;
 
+    std::vector<std::shared_ptr<TB::Renderable>> mModels;
+    int mModelIndex;
+
     bool mUpdateGrid;
+    bool mShowDebugConservative;
+    bool mShowDebugWire;
 
     TB::DirectXConstants<TB::DirectXViewConstants> mViewConstants;
     TB::DirectXConstants<TB::DirectXObjectConstants> mObjectConstants;

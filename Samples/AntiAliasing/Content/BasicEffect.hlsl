@@ -5,14 +5,14 @@ cbuffer ViewBuffer : register(b0)
     float4x4 viewToClip;
 };
 
-cbuffer WorldBuffer : register(b1)
-{
-    float3 mainLightDir;
-};
-
-cbuffer ObjectBuffer : register(b2)
+cbuffer ObjectBuffer : register(b1)
 {
     float4x4 localToWorld;
+};
+
+cbuffer WorldBuffer : register(b2)
+{
+    float3 mainLightDir;
 };
 
 Texture2D<float4> mainTexture : register(t0);

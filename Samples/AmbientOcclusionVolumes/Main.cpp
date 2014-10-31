@@ -55,14 +55,14 @@ public:
         auto ps = std::dynamic_pointer_cast<TB::DirectXShader>(mPixelShader);
         auto tex = std::dynamic_pointer_cast<TB::DirectXTexture>(mTexture);
 
-        ID3D11Buffer* constants[] = { mViewConstants, mWorldConstants };
+        ID3D11Buffer* constants[] = { mViewConstants, nullptr, mWorldConstants };
         ID3D11ShaderResourceView* srvs[] =  { *tex };
         ID3D11SamplerState* samplers[] = { TB::DirectXSamplerState::get() };
 
         imc->RSSetState(TB::DirectXRasterizerState::get());
-        imc->VSSetConstantBuffers(0, 2, constants);
+        imc->VSSetConstantBuffers(0, 3, constants);
         imc->VSSetShader(*vs, nullptr, 0);
-        imc->PSSetConstantBuffers(0, 2, constants);
+        imc->PSSetConstantBuffers(0, 3, constants);
         imc->PSSetShader(*ps, nullptr, 0);
         imc->PSSetShaderResources(0, 1, srvs);
         imc->PSSetSamplers(0, 1, samplers);

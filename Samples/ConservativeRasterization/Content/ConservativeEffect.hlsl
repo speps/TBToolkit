@@ -27,6 +27,7 @@ struct VSInput
 struct VSOutput
 {
     float4 position : SV_POSITION;
+    float4 color : COLOR0;
 };
 
 #define XFORM(p) (mul(mul(mul(float4(p, 1), localToWorld), worldToView), viewToClip))
@@ -61,8 +62,8 @@ VSOutput MainVS(VSInput input)
 
     float area = 0.5 * cross2D(vPrev, vNext);
 
-    float2 nNext = normalize(vNext.yx * float2(-1, 1)) * invTexel * sign(area) * 0.7074;
-    float2 nPrev = normalize(vPrev.yx * float2(-1, 1)) * invTexel * sign(area) * 0.7074;
+    float2 nNext = normalize(vNext.yx * float2(-1, 1)) * invTexel * sign(area);
+    float2 nPrev = normalize(vPrev.yx * float2(-1, 1)) * invTexel * sign(area);
 
     float2 curOffsetN = curPos.xy / curPos.w + nNext;
     float2 nextOffset = nextPos.xy / nextPos.w + nNext;
@@ -73,11 +74,12 @@ VSOutput MainVS(VSInput input)
 
     vs.position = curPos;
     vs.position.xy = pt * curPos.w;
+    vs.color = meshColor;
 
     return vs;
 }
 
 float4 MainPS(in VSOutput vs) : SV_TARGET0
 {
-    return meshColor;
+    return vs.color;
 }

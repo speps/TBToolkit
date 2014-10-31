@@ -78,8 +78,8 @@ namespace TB
         ID3D11Buffer* constants[] = { mObjectConstants };
 
         auto imc = mRenderer->getImmediateContext();
-        imc->VSSetConstantBuffers(2, 1, constants);
-        imc->PSSetConstantBuffers(2, 1, constants);
+        imc->VSSetConstantBuffers(1, 1, constants);
+        imc->PSSetConstantBuffers(1, 1, constants);
 
         model->render();
     }

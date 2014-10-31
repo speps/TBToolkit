@@ -22,4 +22,9 @@
       <Filter>Content</Filter>
     </ToolkitContentTask>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Content\GrassScene.ogex">
+      <Filter>Content</Filter>
+    </None>
+  </ItemGroup>
 </Project>

@@ -174,10 +174,13 @@ namespace TB
             desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 
             D3D11_SUBRESOURCE_DATA initData{};
-            initData.pSysMem = &stream.data[0];
+            if (stream.data.size() > 0)
+            {
+                initData.pSysMem = &stream.data[0];
 
-            HRESULT hr = mRenderer->getDevice()->CreateBuffer(&desc, &initData, mesh.vertexBuffers[i].getInitRef());
-            TB::runtimeCheck(hr == S_OK);
+                HRESULT hr = mRenderer->getDevice()->CreateBuffer(&desc, &initData, mesh.vertexBuffers[i].getInitRef());
+                TB::runtimeCheck(hr == S_OK);
+            }
 
             mesh.transientBuffers[i] = mesh.vertexBuffers[i];
             mesh.transientStrides[i] = stream.elements * sizeof(float);
@@ -192,10 +195,13 @@ namespace TB
             desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 
             D3D11_SUBRESOURCE_DATA initData{};
-            initData.pSysMem = &indices[0];
+            if (indices.size())
+            {
+                initData.pSysMem = &indices[0];
 
-            HRESULT hr = mRenderer->getDevice()->CreateBuffer(&desc, &initData, mesh.indexBuffer.getInitRef());
-            TB::runtimeCheck(hr == S_OK);
+                HRESULT hr = mRenderer->getDevice()->CreateBuffer(&desc, &initData, mesh.indexBuffer.getInitRef());
+                TB::runtimeCheck(hr == S_OK);
+            }
         }
 
         mesh.inputLayoutID = DirectXInputLayoutRegistry::create(vertices);
