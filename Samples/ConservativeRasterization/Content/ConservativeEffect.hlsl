@@ -15,6 +15,7 @@ cbuffer TempBuffer : register(b2)
     float4 meshColor;
     float2 invTexel;
     float2 offset;
+    float invTexelDiag;
 };
 
 struct VSInput
@@ -62,8 +63,8 @@ VSOutput MainVS(VSInput input)
 
     float area = 0.5 * cross2D(vPrev, vNext);
 
-    float2 nNext = normalize(vNext.yx * float2(-1, 1)) * invTexel * sign(area);
-    float2 nPrev = normalize(vPrev.yx * float2(-1, 1)) * invTexel * sign(area);
+    float2 nNext = normalize(vNext.yx * float2(-1, 1)) * invTexel * sign(area) * invTexelDiag;
+    float2 nPrev = normalize(vPrev.yx * float2(-1, 1)) * invTexel * sign(area) * invTexelDiag;
 
     float2 curOffsetN = curPos.xy / curPos.w + nNext;
     float2 nextOffset = nextPos.xy / nextPos.w + nNext;

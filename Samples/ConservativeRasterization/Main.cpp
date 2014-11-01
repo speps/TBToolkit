@@ -22,6 +22,8 @@ struct TempConstants
     float quadColor[4];
     float invPixel[2];
     float offset[2];
+    float invPixelDiag;
+    float padding[3];
 };
 
 enum class DebugMode
@@ -37,9 +39,9 @@ public:
     DirectXFrame()
         : mTimer(0.0f)
         , mFrameIndex(0)
-        , mDivider(1)
+        , mDivider(32)
         , mOffset(math::float2::zero)
-        , mModelIndex(1)
+        , mModelIndex(0)
         , mUpdateGrid(true)
         , mShowDebugConservative(true)
         , mShowDebugWire(true)
@@ -219,7 +221,7 @@ public:
         }
 
         {
-            TempConstants temp = { 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f };
+            TempConstants temp = { 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f };
             mTempConstants.create(renderer);
             mTempConstants.update(temp);
         }
@@ -238,10 +240,11 @@ public:
         int height = mRenderer->getHeight() / mDivider;
         float invPixelX = 2.0f / width;
         float invPixelY = 2.0f / height;
+        float invPixelDiag = math::Sqrt(2.0f) * 0.5f;
 
         if (debug == DebugMode::Wire)
         {
-            TempConstants temp = { 0.0f, 0.0f, 1.0f, 1.0f, invPixelX, invPixelY, mOffset.x, mOffset.y };
+            TempConstants temp = { 0.0f, 0.0f, 1.0f, 1.0f, invPixelX, invPixelY, mOffset.x, mOffset.y, invPixelDiag };
             mTempConstants.update(temp);
             imc->RSSetState(TB::DirectXRasterizerState::get<TB::CullMode::None, TB::FillMode::Wireframe>());
 
@@ -250,7 +253,7 @@ public:
         }
         else if (debug == DebugMode::Output)
         {
-            TempConstants temp = { 0.0f, 1.0f, 0.0f, 1.0f, invPixelX, invPixelY, mOffset.x, mOffset.y };
+            TempConstants temp = { 0.0f, 1.0f, 0.0f, 1.0f, invPixelX, invPixelY, mOffset.x, mOffset.y, invPixelDiag };
             mTempConstants.update(temp);
             imc->RSSetState(TB::DirectXRasterizerState::get<TB::CullMode::None, TB::FillMode::Wireframe>());
 
@@ -259,7 +262,7 @@ public:
         }
         else
         {
-            TempConstants temp = { 1.0f, 1.0f, 1.0f, 1.0f, invPixelX, invPixelY, mOffset.x, mOffset.y };
+            TempConstants temp = { 1.0f, 1.0f, 1.0f, 1.0f, invPixelX, invPixelY, mOffset.x, mOffset.y, invPixelDiag };
             mTempConstants.update(temp);
             imc->RSSetState(TB::DirectXRasterizerState::get<TB::CullMode::None>());
 
@@ -481,13 +484,18 @@ public:
 
     virtual void update(float delta) override
     {
+        float coeff = 1.0f;
+        if (TB::isKeyDown(TB::Key::LShift) || TB::isKeyDown(TB::Key::RShift))
+        {
+            coeff = 0.1f;
+        }
         if (TB::isKeyDown(TB::Key::Home))
         {
-            mTimer += delta;
+            mTimer += delta * coeff;
         }
         if (TB::isKeyDown(TB::Key::End))
         {
-            mTimer -= delta;
+            mTimer -= delta * coeff;
         }
 
         float s = math::Sin(mTimer);
@@ -572,7 +580,7 @@ private:
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
     auto canvas = TB::CreateWindowsCanvas(hInstance);
-    if (!canvas->init(L"Conservative Rasterization", 1280, 720))
+    if (!canvas->init(L"Conservative Rasterization", 1280, 736))
     {
         return 1;
     }
