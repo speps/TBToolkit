@@ -22,8 +22,6 @@ struct TempConstants
     float quadColor[4];
     float invPixel[2];
     float offset[2];
-    float invPixelDiag;
-    float padding[3];
 };
 
 enum class DebugMode
@@ -240,11 +238,10 @@ public:
         int height = mRenderer->getHeight() / mDivider;
         float invPixelX = 2.0f / width;
         float invPixelY = 2.0f / height;
-        float invPixelDiag = math::Sqrt(2.0f) * 0.5f;
 
         if (debug == DebugMode::Wire)
         {
-            TempConstants temp = { 0.0f, 0.0f, 1.0f, 1.0f, invPixelX, invPixelY, mOffset.x, mOffset.y, invPixelDiag };
+            TempConstants temp = { 0.0f, 0.0f, 1.0f, 1.0f, invPixelX, invPixelY, mOffset.x, mOffset.y };
             mTempConstants.update(temp);
             imc->RSSetState(TB::DirectXRasterizerState::get<TB::CullMode::None, TB::FillMode::Wireframe>());
 
@@ -253,7 +250,7 @@ public:
         }
         else if (debug == DebugMode::Output)
         {
-            TempConstants temp = { 0.0f, 1.0f, 0.0f, 1.0f, invPixelX, invPixelY, mOffset.x, mOffset.y, invPixelDiag };
+            TempConstants temp = { 0.0f, 1.0f, 0.0f, 1.0f, invPixelX, invPixelY, mOffset.x, mOffset.y };
             mTempConstants.update(temp);
             imc->RSSetState(TB::DirectXRasterizerState::get<TB::CullMode::None, TB::FillMode::Wireframe>());
 
@@ -262,7 +259,7 @@ public:
         }
         else
         {
-            TempConstants temp = { 1.0f, 1.0f, 1.0f, 1.0f, invPixelX, invPixelY, mOffset.x, mOffset.y, invPixelDiag };
+            TempConstants temp = { 1.0f, 1.0f, 1.0f, 1.0f, invPixelX, invPixelY, mOffset.x, mOffset.y };
             mTempConstants.update(temp);
             imc->RSSetState(TB::DirectXRasterizerState::get<TB::CullMode::None>());
 
@@ -502,7 +499,7 @@ public:
         float c = math::Cos(mTimer);
         mCurrentEyePosition.x = s * -1.0f;
         mCurrentEyePosition.y = c * -1.0f;
-        mCurrentEyePosition.z = 1.0f;
+        mCurrentEyePosition.z = 2.0f;
 
         if (TB::isKeyPressed(TB::Key::PageDown))
         {
